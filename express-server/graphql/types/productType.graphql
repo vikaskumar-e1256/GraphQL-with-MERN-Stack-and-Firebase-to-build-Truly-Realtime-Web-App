@@ -1,3 +1,10 @@
+type POST {
+  id: ID!
+  title: String!
+  description: String!
+}
+
 type Query {
   total_posts: Int!
+  all_posts: [POST!]!
 }
