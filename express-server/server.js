@@ -4,40 +4,9 @@ const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const typeDefs = require('./graphql/typeDefs');
+const resolvers = require('./graphql/resolvers');
 
-// Sample data
-const books = [
-    {
-        title: 'The Awakening',
-        author: 'Kate Chopin',
-        created_at: new Date().toDateString(),
-    },
-    {
-        title: 'City of Glass',
-        author: 'Paul Auster',
-        created_at: new Date().toDateString(),
-    },
-];
-
-// GraphQL schema
-const typeDefs = `
-    type Query {
-        books_data: [Book]
-    }
-
-    type Book {
-        title: String
-        author: String
-        created_at: String
-    }
-`;
-
-// Resolvers
-const resolvers = {
-    Query: {
-        books_data: () => books,
-    },
-};
 
 // Create an instance of ApolloServer
 const server = new ApolloServer({
