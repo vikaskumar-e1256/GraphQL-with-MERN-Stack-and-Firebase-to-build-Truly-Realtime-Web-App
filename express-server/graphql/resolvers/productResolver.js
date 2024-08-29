@@ -1,9 +1,5 @@
 module.exports = {
     Query: {
-        products: () => { },
-        product: () => { }
+        total_posts: () => 45
     },
-    Product: {
-        client: () => { }
-    }
 }

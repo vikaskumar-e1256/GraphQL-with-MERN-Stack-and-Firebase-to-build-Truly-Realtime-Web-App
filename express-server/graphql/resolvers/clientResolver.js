@@ -1,12 +1,6 @@
 module.exports = {
     Query: {
-        clients: () => { },
-        client: () => { }
+        me: () => 'Vikas Kumar'
     },
-    Mutation: {
-        addClient: () => { }
-    },
-    Client: {
-        products: () => { }
-    }
+
 }
