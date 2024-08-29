@@ -3,10 +3,21 @@ require('dotenv').config();
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
 
+
+// Database Connection
+const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
+main().catch(err => console.log(err));
+
+async function main()
+{
+    await mongoose.connect(process.env.DATABASE_CLOUD, clientOptions);
+    // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
+}
 
 // Create an instance of ApolloServer
 const server = new ApolloServer({
