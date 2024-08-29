@@ -15,8 +15,7 @@ main().catch(err => console.log(err));
 
 async function main()
 {
-    await mongoose.connect(process.env.DATABASE_CLOUD, clientOptions);
-    // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
+    await mongoose.connect(process.env.DATABASE_LOCAL, clientOptions);
 }
 
 // Create an instance of ApolloServer
