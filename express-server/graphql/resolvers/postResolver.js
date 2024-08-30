@@ -8,10 +8,11 @@ const data = () => posts;
 const createPost = (parent, args) =>
 {
     console.log(parent, '-', args);
+    const { title, description } = args.input;
     const post = {
         id: posts.length + 1,
-        title: args.title,
-        description: args.description
+        title: title,
+        description: description
     }
     posts.push(post);
     return post;

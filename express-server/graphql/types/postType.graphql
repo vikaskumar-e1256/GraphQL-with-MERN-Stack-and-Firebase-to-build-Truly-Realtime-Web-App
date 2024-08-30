@@ -10,7 +10,13 @@ type Query {
   all_posts: [Post!]!
 }
 
+# Input type
+input PostInput {
+  title: String!
+  description: String!
+}
+
 # Mutation Part
 type Mutation {
-  newPost(title: String! description: String!): Post!
+  newPost(input: PostInput): Post!
 }
