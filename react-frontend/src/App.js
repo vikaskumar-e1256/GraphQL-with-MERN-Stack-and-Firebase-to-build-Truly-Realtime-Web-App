@@ -1,4 +1,4 @@
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useLazyQuery } from '@apollo/client';
 import { useEffect, useState } from 'react';
 
 // GraphQL query to fetch posts
@@ -14,19 +14,11 @@ const GET_POSTS = gql`
 
 function App()
 {
-  const [posts, setPosts] = useState([]);
-
   // Use Apollo Client's useQuery hook to fetch data
   const { loading, error, data } = useQuery(GET_POSTS);
 
-  // UseEffect should not be called conditionally, so handle side effects inside it
-  useEffect(() =>
-  {
-    if (data)
-    {
-      setPosts(data.all_posts);
-    }
-  }, [data]); // The effect will run whenever 'data' changes
+  // Use Apollo Client's useLazyQuery hook to fetch data
+  const [fire, { data: all_posts }] = useLazyQuery(GET_POSTS);
 
   // Handling the loading and error states outside of the useEffect hook
   if (loading) return <p>Loading...</p>;
@@ -35,7 +27,7 @@ function App()
   return (
     <div className='container p-5'>
       <div className="row">
-        {posts.map((post) => (
+        {data.all_posts.map((post) => (
           <div className="col-md-4" key={post.id}>
             <div className="card mb-4">
               <div className="card-body">
@@ -46,6 +38,10 @@ function App()
           </div>
         ))}
       </div>
+      <div className='p-5'>
+        <button onClick={() => fire()}>Fetch</button>
+      </div>
+      {JSON.stringify(all_posts)}
     </div>
   );
 }
