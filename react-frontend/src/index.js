@@ -6,7 +6,7 @@ import App from './App';
 
 
 const client = new ApolloClient({
-  uri: 'https://flyby-router-demo.herokuapp.com/',
+  uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
   cache: new InMemoryCache(),
 });
 
@@ -16,4 +16,3 @@ root.render(
     <App />
   </ApolloProvider>
 );
-
