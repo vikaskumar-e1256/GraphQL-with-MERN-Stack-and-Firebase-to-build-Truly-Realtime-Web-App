@@ -1,5 +1,6 @@
 import { gql, useQuery, useLazyQuery } from '@apollo/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { AuthContext } from './context/authContext';
 
 // GraphQL query to fetch posts
 const GET_POSTS = gql`
@@ -14,6 +15,7 @@ const GET_POSTS = gql`
 
 function App()
 {
+  const { state, dispatch } = useContext(AuthContext);
   // Use Apollo Client's useQuery hook to fetch data
   const { loading, error, data } = useQuery(GET_POSTS);
 
@@ -23,6 +25,14 @@ function App()
   // Handling the loading and error states outside of the useEffect hook
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error! {error.message}</p>;
+
+  const changeUserName = () =>
+  {
+    dispatch({
+      type: 'LOGGED_IN_USER',
+      payload: 'Vikas Kumar'
+    });
+  }
 
   return (
     <div className='container p-5'>
@@ -42,6 +52,11 @@ function App()
         <button onClick={() => fire()}>Fetch</button>
       </div>
       {JSON.stringify(all_posts)}
+      <hr />
+      {JSON.stringify(state.user)}
+      <div className='p-5'>
+        <button onClick={changeUserName}>Change user name</button>
+      </div>
     </div>
   );
 }
