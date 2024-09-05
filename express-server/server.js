@@ -9,7 +9,6 @@ const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
 const { authCheck } = require('./helpers/auth');
 
-
 // Database Connection
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 main().catch(err => console.log(err));
@@ -23,7 +22,11 @@ async function main()
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({ req, res }) => ({ req, res })
+    context: async ({ req, res }) =>
+    {
+        // Ensure req and res are passed correctly
+        return { req, res };
+    }
 });
 
 // Start the Apollo Server and integrate with Express
@@ -40,12 +43,17 @@ async function startApolloServer()
     await server.start();
 
     // Apply Apollo GraphQL middleware and set the path to /graphql
-    app.use('/graphql', expressMiddleware(server));
+    app.use('/graphql', expressMiddleware(server, {
+        context: async ({ req, res }) =>
+        {
+            return { req, res };
+        }
+    }));
 
     // Define other Express routes if needed
     app.get('/rest', authCheck, (req, res) =>
     {
-        res.json({data: 'Hello from Express server!'});
+        res.json({ data: 'Hello from Express server!' });
     });
 
     // Start the Express server on port 8000

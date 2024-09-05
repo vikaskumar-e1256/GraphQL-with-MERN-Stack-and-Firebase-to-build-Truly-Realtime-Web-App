@@ -1,17 +1,22 @@
-let authorize = true;
+const admin = require("firebase-admin");
 
-exports.authCheck = (req, res, next = (f) => f) =>
+const serviceAccount = require("../config/graphql-node-react-firebase-adminsdk.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+
+exports.authCheck = async (req) =>
 {
-    if (!req.headers.authtoken) {
-        throw new Error('Unauthorized!');
-    }
-
-    const valid = req.headers.authtoken === 'secret';
-
-    if (!valid) {
-        throw new Error('Unauthorized!');
-    } else
+    try
     {
-        next();
+        const currentUser = await admin.auth().verifyIdToken(req.headers.authtoken);
+        console.log(currentUser);
+        return currentUser;
+    } catch (error)
+    {
+        console.log('Auth check error::', error);
+        throw new Error('Invalid or expired token');
     }
 }
