@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { auth } from '../../firebase';
 import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
 
@@ -10,7 +11,7 @@ function Register(props)
 
     const handleSubmit = (e) =>
     {
-        console.log(auth);
+        // console.log(auth);
         e.preventDefault();
         // Handle register logic here
         setLoading(true);
@@ -24,6 +25,7 @@ function Register(props)
             .then(() =>
             {
                 // The link was successfully sent. Inform the user.
+                toast.success(`Email sent to ${email}. Click the link to complete your registration.`);
                 // Save the email locally so you don't need to ask the user for it again
                 // if they open the link on the same device.
                 window.localStorage.setItem('emailForSignIn', email);

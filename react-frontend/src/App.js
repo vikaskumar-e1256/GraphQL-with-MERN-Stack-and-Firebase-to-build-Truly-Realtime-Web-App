@@ -1,5 +1,6 @@
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
-import { Routes, Route  } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
 import Nav from './components/Nav';
 import Home from './pages/Home';
 import Login from "./pages/auth/Login";
@@ -17,6 +18,7 @@ function App()
   return (
     <ApolloProvider client={client}>
       <Nav />
+      <ToastContainer />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
