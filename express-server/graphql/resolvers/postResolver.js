@@ -1,8 +1,13 @@
 const { posts } = require('../../temp');
+const { authCheck } = require('../../helpers/auth');
 
 // Query Part
 const postsCount = () => posts.length;
-const data = () => posts;
+const data = async (parent, args, { req, res }) =>
+{
+    await authCheck(req);
+    return posts;
+};
 
 // Mutation Part
 const createPost = (parent, args) =>
