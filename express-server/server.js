@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
+const { authCheck } = require('./helpers/auth');
 
 
 // Database Connection
@@ -22,6 +23,7 @@ async function main()
 const server = new ApolloServer({
     typeDefs,
     resolvers,
+    context: async ({ req, res }) => ({ req, res })
 });
 
 // Start the Apollo Server and integrate with Express
@@ -41,7 +43,7 @@ async function startApolloServer()
     app.use('/graphql', expressMiddleware(server));
 
     // Define other Express routes if needed
-    app.get('/rest', (req, res) =>
+    app.get('/rest', authCheck, (req, res) =>
     {
         res.json({data: 'Hello from Express server!'});
     });
