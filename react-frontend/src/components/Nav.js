@@ -1,8 +1,33 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth";
+import { AuthContext } from "../context/authContext";
+import { useContext } from "react";
+import { toast } from "react-toastify";
+
 
 
 const Nav = () =>
 {
+    const { state, dispatch } = useContext(AuthContext);
+    const { user } = state;
+    console.log(user);
+    let history = useNavigate();
+    const auth = getAuth();
+
+    const logout = () =>
+    {
+        signOut(auth).then(() =>
+        {
+            history('/login');
+            dispatch({
+                type: 'LOGGED_IN_USER',
+                payload: null
+            });
+        }).catch((error) =>
+        {
+            toast.error(error.message);
+        });
+    }
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-body-tertiary">
             <div className="container-fluid">
@@ -23,12 +48,23 @@ const Nav = () =>
                         <li className="nav-item">
                             <NavLink className="nav-link" aria-current="page" to="/">Home</NavLink>
                         </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/login">Login</NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/register">Register</NavLink>
-                        </li>
+                        {!user && (
+                            <>
+                            <li className="nav-item">
+                                <NavLink className="nav-link" to="/login">Login</NavLink>
+                            </li>
+                            <li className="nav-item">
+                                <NavLink className="nav-link" to="/register">Register</NavLink>
+                            </li>
+                            </>
+                        )}
+
+                        {user && (
+                            <li className="nav-item">
+                                <a className="nav-link" onClick={() => logout()}>Logout</a>
+                            </li>
+                        )}
+
                         {/* <li className="nav-item dropdown">
                             <a
                                 data-mdb-dropdown-init

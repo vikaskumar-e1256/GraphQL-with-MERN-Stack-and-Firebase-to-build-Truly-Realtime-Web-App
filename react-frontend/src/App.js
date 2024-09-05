@@ -5,6 +5,7 @@ import Nav from './components/Nav';
 import Home from './pages/Home';
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import CompleteRegistration from './pages/auth/CompleteRegistration';
 
 
 
@@ -23,6 +24,7 @@ function App()
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/complete-registration' element={<CompleteRegistration />} />
       </Routes>
       {/* <Home /> */}
     </ApolloProvider>
