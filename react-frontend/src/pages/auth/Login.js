@@ -4,6 +4,9 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { gql, useMutation } from '@apollo/client';
 import { AuthContext } from '../../context/authContext';
+import EmailField from '../../components/common/EmailField';
+import PasswordField from '../../components/common/PasswordField';
+import SubmitButton from '../../components/common/SubmitButton';
 
 // Define mutation
 const SAVE_USER_INTO_DB = gql`
@@ -76,18 +79,18 @@ function Login(props)
         {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
-            const idTokenResult = await user.getIdTokenResult();  // Get token using getIdTokenResult()
+            const idTokenResult = await user.getIdToken(true);  // Get token using getIdTokenResult()
 
             dispatch({
                 type: 'LOGGED_IN_USER',
                 payload: {
                     email: user.email,
-                    token: idTokenResult.token,
+                    token: idTokenResult,
                 },
             });
 
             await userCreate();  // Save user info to the database
-            history('/');
+            history('/update/profile');
         } catch (error)
         {
             console.error('Google login error:', error);
@@ -111,37 +114,9 @@ function Login(props)
                     {loading ? 'Loading...' : 'Google Login'}
                 </button>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group mb-3">
-                        <label htmlFor="email">Email Address</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="form-control"
-                            placeholder="Enter email address"
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="form-control"
-                            placeholder="Enter your password"
-                            disabled={loading}
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="btn btn-primary w-100"
-                        disabled={!email || loading}
-                    >
-                        {loading ? 'Loading...' : 'Submit'}
-                    </button>
+                    <EmailField email={email} setEmail={setEmail} loading={loading} />
+                    <PasswordField password={password} setPassword={setPassword} loading={loading} />
+                    <SubmitButton loading={loading} disabled={!email || loading} label="Submit" />
                 </form>
                 <Link to="/forgot-password">Forgot password?</Link>
             </div>

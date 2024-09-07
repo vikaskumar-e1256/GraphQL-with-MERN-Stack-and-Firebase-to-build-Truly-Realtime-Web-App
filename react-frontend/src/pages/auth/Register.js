@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { auth } from '../../firebase';
 import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
-
+import EmailField from '../../components/common/EmailField';
+import SubmitButton from '../../components/common/SubmitButton';
 
 function Register(props)
 {
@@ -47,26 +48,8 @@ function Register(props)
             <div className="card shadow-sm p-4" style={{ maxWidth: '400px', width: '100%' }}>
                 <h4 className="text-center mb-4">Register</h4>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group mb-3">
-                        <label htmlFor="email">Email Address</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="form-control"
-                            placeholder="Enter email address"
-                            disabled={loading}
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="btn btn-primary w-100"
-                        disabled={!email || loading}
-                    >
-                        {loading ? 'Loading...' : 'Submit'}
-                    </button>
+                    <EmailField email={email} setEmail={setEmail} loading={loading} />
+                    <SubmitButton loading={loading} disabled={!email || loading} label="Submit" />
                 </form>
             </div>
         </div>
