@@ -1,0 +1,8 @@
+type userCreateResponse {
+  username: String!
+  email: String!
+}
+
+type Mutation {
+  userCreate: userCreateResponse!
+}
