@@ -39,3 +39,8 @@ type Mutation {
   userCreate: userCreateResponse!
   userUpdate(input: UserUpdateInput): User!
 }
+
+# Query type
+type Query {
+  profile: User!
+}
