@@ -1,8 +1,41 @@
+# Custom types
 type userCreateResponse {
   username: String!
   email: String!
 }
 
+type Image {
+  url: String
+  public_id: String
+}
+
+type User {
+  _id: ID!
+  username: String
+  email: String
+  name: String
+  images: [Image]
+  about: String
+  createdAt: String
+  updatedAt: String
+}
+
+# Custom Inputs
+input ImageInput {
+  url: String
+  public_id: String
+}
+
+input UserUpdateInput {
+  username: String
+  email: String
+  name: String
+  images: [ImageInput]
+  about: String
+}
+
+# Mutation type
 type Mutation {
   userCreate: userCreateResponse!
+  userUpdate(input: UserUpdateInput): User!
 }
