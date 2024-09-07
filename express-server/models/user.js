@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Schema;
+const { v4: uuidv4 } = require('uuid');
+
 
 const userSchema = mongoose.Schema({
     username: {
@@ -19,7 +21,7 @@ const userSchema = mongoose.Schema({
         type: Array,
         default: {
             url: 'https://placehold.co/200x200.png?text=profile',
-            public_id: '123'
+            public_id: uuidv4()
         }
     },
     about: {
