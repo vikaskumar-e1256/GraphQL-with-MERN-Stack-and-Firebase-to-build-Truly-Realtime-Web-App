@@ -27,7 +27,7 @@ function Profile(props)
         name: '',
         email: '',
         about: '',
-        images: ''
+        images: []
     });
 
     const [loading, setLoading] = useState(false);
@@ -35,11 +35,23 @@ function Profile(props)
     // Use Apollo Client's useQuery hook to fetch data
     const { error, data } = useQuery(GET_USER_INFO);
 
-    useMemo(() => { }, []);
+    useMemo(() =>
+    {
+        if (data) {
+            console.log(data);
+            setValues({
+                username: data.profile.username,
+                name: data.profile.name,
+                email: data.profile.email,
+                about: data.profile.about,
+                images: data.profile.images
+            });
+        }
+    }, [data]);
 
     return (
         <div className='container pt-5'>
-           {JSON.stringify(data)}
+           {JSON.stringify(values)}
         </div>
     );
 }
