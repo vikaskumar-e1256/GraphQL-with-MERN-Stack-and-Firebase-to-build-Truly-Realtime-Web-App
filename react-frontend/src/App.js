@@ -9,6 +9,8 @@ import CompleteRegistration from './pages/auth/CompleteRegistration';
 import { AuthContext } from "./context/authContext";
 import { useContext } from 'react';
 import { setContext } from '@apollo/client/link/context';
+import PrivateRoute from './components/PrivateRoute';
+import UpdatePassword from './components/forms/auth/UpdatePassword';
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
@@ -45,6 +47,30 @@ function App()
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/complete-registration' element={<CompleteRegistration />} />
+        <Route
+          path="/update/profile"
+          element={
+            <PrivateRoute>
+              <UpdatePassword />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/update/password"
+          element={
+            <PrivateRoute>
+              <UpdatePassword />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/create/post"
+          element={
+            <PrivateRoute>
+              <UpdatePassword />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </ApolloProvider>
   );

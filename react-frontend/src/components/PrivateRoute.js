@@ -1,60 +1,43 @@
-import { Route, Link } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { AuthContext } from '../context/authContext';
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 
-const PrivateRoute = ({ children, ...rest }) =>
+const PrivateRoute = ({ children }) =>
 {
-    const { state, dispatch } = useContext(AuthContext);
+    const { state } = useContext(AuthContext);
+    const { user } = state;
 
-    const [user, setUser] = useState(false);
-
-    useEffect(() =>
-    {
-        if (state.user)
-        {
-            setUser(true);
-        }
-    }, [state.user]);
-
-    const navLinks = () =>
-    {
-        return (
-            <nav>
-                <ul className="nav flex-column">
-
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/update/profile" >Profile</Link>
-                    </li>
-
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/update/password" >Password</Link>
-                    </li>
-
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/create/post" >Post</Link>
-                    </li>
-
-                </ul>
-            </nav>
-        );
-    }
-
-    const renderContent = () =>
+    // If user is authenticated, render the child components
+    if (user)
     {
         return (
             <div className="container-fluid pt-5">
                 <div className="row">
                     <div className="col-md-4">
-                        {navLinks()}
+                        <nav>
+                            <ul className="nav flex-column">
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/update/profile">Profile</Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/update/password">Password</Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/create/post">Post</Link>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                     <div className="col-md-8">
-                        <Route {...rest} />
+                        {children}
                     </div>
                 </div>
             </div>
         );
     }
-    return user ? renderContent() : <h4>Loading...</h4>
+
+    // If user is not authenticated, show loading or redirect
+    return <Navigate to="/login" />;
 };
 
 export default PrivateRoute;
