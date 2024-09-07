@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { gql, useMutation } from '@apollo/client';
 import { AuthContext } from '../../context/authContext';
@@ -143,6 +143,7 @@ function Login(props)
                         {loading ? 'Loading...' : 'Submit'}
                     </button>
                 </form>
+                <Link to="/forgot-password">Forgot password?</Link>
             </div>
         </div>
     );

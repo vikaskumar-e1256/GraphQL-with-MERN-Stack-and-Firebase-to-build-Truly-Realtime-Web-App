@@ -13,6 +13,7 @@ import PrivateRoute from './components/PrivateRoute';
 import UpdatePassword from './pages/auth/UpdatePassword';
 import Profile from './pages/auth/Profile';
 import CreatePost from './pages/posts/CreatePost';
+import ForgotPassword from './pages/auth/ForgotPassword';
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
@@ -49,6 +50,7 @@ function App()
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/complete-registration' element={<CompleteRegistration />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route
           path="/update/profile"
           element={
