@@ -2,12 +2,24 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { auth } from '../../firebase';
+import { gql, useMutation } from '@apollo/client';
 import { updatePassword, signInWithEmailLink } from "firebase/auth";
 import { AuthContext } from "../../context/authContext";
 
+// Define mutation
+const SAVE_USER_INTO_DB = gql`
+  mutation Mutation {
+    userCreate {
+        username
+        email
+
+    }
+  }
+`;
 
 function CompleteRegistration(props)
 {
+    const [userCreate, { loading: mloading, error }] = useMutation(SAVE_USER_INTO_DB);
     const { dispatch } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
@@ -15,10 +27,15 @@ function CompleteRegistration(props)
 
     let history = useNavigate();
 
+    // Always call useEffect at the top level of the component
     useEffect(() =>
     {
-        setEmail(localStorage.getItem('emailForSignIn'))
+        setEmail(localStorage.getItem('emailForSignIn'));
     }, [history]);
+
+    // Conditional return statements for loading and error handling
+    if (mloading) return 'Submitting...';
+    if (error) return `Submission error! ${error.message}`;
 
     const handleSubmit = async (e) =>
     {
@@ -54,7 +71,8 @@ function CompleteRegistration(props)
                     },
                 });
 
-                // make api request to save user info in mongodb
+                // Make API request to save user info in MongoDB
+                await userCreate();
 
                 // Redirect after successful login
                 history('/');

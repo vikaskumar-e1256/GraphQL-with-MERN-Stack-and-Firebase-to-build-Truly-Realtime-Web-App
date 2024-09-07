@@ -10,8 +10,8 @@ function Login(props)
     const provider = new GoogleAuthProvider();
 
     const [loading, setLoading] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('bigdelladka@gmail.com');
+    const [password, setPassword] = useState('12345678');
     const auth = getAuth();
     const { dispatch } = useContext(AuthContext);
     let history = useNavigate();
