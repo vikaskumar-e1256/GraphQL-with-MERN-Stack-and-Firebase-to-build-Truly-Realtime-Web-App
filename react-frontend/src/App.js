@@ -10,33 +10,30 @@ import { AuthContext } from "./context/authContext";
 import { useContext } from 'react';
 import { setContext } from '@apollo/client/link/context';
 
-
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
 });
 
 function App()
 {
-  const { state, dispatch } = useContext(AuthContext);
+  const { state } = useContext(AuthContext);
   const { user } = state;
 
   const authLink = setContext((_, { headers }) =>
   {
-    // get the authentication token from local storage if it exists
-    // const token = localStorage.getItem('token');
-    // return the headers to the context so httpLink can read them
+    // Conditionally add authtoken if user is authenticated
+    const token = user ? user.token : '';
     return {
       headers: {
         ...headers,
-        authtoken: user ? user.token : ''
-        // authorization: token ? `Bearer ${token}` : "",
+        ...(token && { authtoken: token }) // Add authtoken only if it exists
       }
-    }
+    };
   });
-  
+
   const client = new ApolloClient({
     link: authLink.concat(httpLink),
-    cache: new InMemoryCache()
+    cache: new InMemoryCache(),
   });
 
   return (
@@ -49,7 +46,6 @@ function App()
         <Route path='/register' element={<Register />} />
         <Route path='/complete-registration' element={<CompleteRegistration />} />
       </Routes>
-      {/* <Home /> */}
     </ApolloProvider>
   );
 }

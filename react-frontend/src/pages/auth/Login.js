@@ -2,11 +2,22 @@ import React, { useContext, useState } from 'react';
 import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { gql, useMutation } from '@apollo/client';
 import { AuthContext } from '../../context/authContext';
 
+// Define mutation
+const SAVE_USER_INTO_DB = gql`
+  mutation Mutation {
+    userCreate {
+        username
+        email
+    }
+  }
+`;
 
 function Login(props)
 {
+    const [userCreate, { loading: mloading, error }] = useMutation(SAVE_USER_INTO_DB);
     const provider = new GoogleAuthProvider();
 
     const [loading, setLoading] = useState(false);
@@ -16,69 +27,76 @@ function Login(props)
     const { dispatch } = useContext(AuthContext);
     let history = useNavigate();
 
-    const handleSubmit = (e) =>
+    // Conditional return statements for loading and error handling
+    if (mloading) return 'Submitting...';
+    if (error) return `Submission error! ${error.message}`;
+
+    const handleSubmit = async (e) =>
     {
         e.preventDefault();
-        // Handle login logic here
-        signInWithEmailAndPassword(auth, email, password)
-            .then(async (userCredential) =>
-            {
-                // Signed in
-                const user = userCredential.user;
-                const idTokenResult = await user.getIdTokenResult();
+        setLoading(true);
+        try
+        {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
+            if (user.emailVerified)
+            {
+                const idTokenResult = await user.getIdToken(true);
+                // console.log(idTokenResult);
                 dispatch({
                     type: 'LOGGED_IN_USER',
                     payload: {
                         email: user.email,
-                        token: idTokenResult.token,
+                        token: idTokenResult,
                     },
                 });
-                history('/');
-            })
-            .catch((error) =>
-            {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                toast.error(errorMessage);
 
-            });
-        setLoading(false);
+                await userCreate();  // Save user info to the database
+                history('/');
+            }
+            else
+            {
+                toast.error("Please verify your email before logging in.");
+            }
+        } catch (error)
+        {
+            console.error('Login error:', error);
+            toast.error(error.message);
+        } finally
+        {
+            setLoading(false);  // Reset loading state when process is done
+        }
     };
 
-    const googleLogin = () =>
+    const googleLogin = async () =>
     {
-        signInWithPopup(auth, provider)
-            .then(async (result) =>
-            {
-                // This gives you a Google Access Token. You can use it to access the Google API.
-                const credential = GoogleAuthProvider.credentialFromResult(result);
-                const token = credential.accessToken;
-                // The signed-in user info.
-                const user = result.user;
-                // IdP data available using getAdditionalUserInfo(result)
-                const idTokenResult = await user.getIdTokenResult();
+        setLoading(true);
+        try
+        {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            const idTokenResult = await user.getIdTokenResult();  // Get token using getIdTokenResult()
 
-                dispatch({
-                    type: 'LOGGED_IN_USER',
-                    payload: {
-                        email: user.email,
-                        token: idTokenResult.token,
-                    },
-                });
-                history('/');
-            }).catch((error) =>
-            {
-                // Handle Errors here.
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                // The email of the user's account used.
-                const email = error.customData.email;
-                // The AuthCredential type that was used.
-                const credential = GoogleAuthProvider.credentialFromError(error);
-                // ...
+            dispatch({
+                type: 'LOGGED_IN_USER',
+                payload: {
+                    email: user.email,
+                    token: idTokenResult.token,
+                },
             });
-    }
+
+            await userCreate();  // Save user info to the database
+            history('/');
+        } catch (error)
+        {
+            console.error('Google login error:', error);
+            toast.error(error.message);
+        } finally
+        {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="container d-flex align-items-center justify-content-center vh-100">
@@ -87,7 +105,8 @@ function Login(props)
                 <button
                     type="button"
                     onClick={googleLogin}
-                    className="btn btn-danger w-100"
+                    className="btn btn-danger w-100 mb-3"
+                    disabled={loading}
                 >
                     {loading ? 'Loading...' : 'Google Login'}
                 </button>

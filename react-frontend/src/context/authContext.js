@@ -1,66 +1,81 @@
 import React, { createContext, useEffect, useReducer } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-// reducer function for update the state.
+// Reducer function to update the state
 const firebaseReducer = (state, action) =>
 {
-    switch (action.type) {
+    switch (action.type)
+    {
         case 'LOGGED_IN_USER':
             return { ...state, user: action.payload };
-
         default:
             return state;
     }
-}
+};
 
-// state
+// Initial state
 const initialState = {
-    user: null
-}
+    user: JSON.parse(localStorage.getItem('user')) || null, // Load user from localStorage if available
+};
 
-// create context
+// Create context
 const AuthContext = createContext();
 
-// context provider
+// Context provider component
 const AuthProvider = ({ children }) =>
 {
-
     const [state, dispatch] = useReducer(firebaseReducer, initialState);
-
-    const value = { state, dispatch };
 
     useEffect(() =>
     {
         const auth = getAuth();
-        const unsubscribe = onAuthStateChanged(auth, async(user) =>
+        const unsubscribe = onAuthStateChanged(auth, async (user) =>
         {
             if (user)
             {
-                // Fetch the token and dispatch user information
-                const idTokenResult = await user.getIdTokenResult();
+                try
+                {
+                    // Fetch the token and dispatch user information
+                    const idTokenResult = await user.getIdTokenResult();
 
-                // Dispatch user data to your AuthContext
-                dispatch({
-                    type: 'LOGGED_IN_USER',
-                    payload: {
+                    const userData = {
                         email: user.email,
                         token: idTokenResult.token,
-                    },
-                });
-                // ...
+                    };
+
+                    // Save user data to context
+                    dispatch({
+                        type: 'LOGGED_IN_USER',
+                        payload: userData,
+                    });
+
+                    // Optionally, persist user in localStorage
+                    localStorage.setItem('user', JSON.stringify(userData));
+                } catch (error)
+                {
+                    console.error("Error fetching token:", error);
+                }
             } else
             {
+                // Clear user from state and localStorage if logged out
                 dispatch({
                     type: 'LOGGED_IN_USER',
-                    payload: null
+                    payload: null,
                 });
+                localStorage.removeItem('user');
             }
         });
-        // useEffect cleanup
+
+        // Cleanup subscription on component unmount
         return () => unsubscribe();
     }, []);
-    return <AuthContext.Provider value={value}>{ children }</AuthContext.Provider>
-}
 
-// export
+    return (
+        <AuthContext.Provider value={{ state, dispatch }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+// Export context and provider
 export { AuthContext, AuthProvider };
