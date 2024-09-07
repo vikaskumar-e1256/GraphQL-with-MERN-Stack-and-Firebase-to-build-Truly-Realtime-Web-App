@@ -5,7 +5,7 @@ type userCreateResponse {
 }
 
 type Image {
-  url: String
+  url: URL
   public_id: String
 }
 
@@ -16,8 +16,8 @@ type User {
   name: String
   images: [Image]
   about: String
-  createdAt: String
-  updatedAt: String
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 # Custom Inputs
@@ -28,7 +28,6 @@ input ImageInput {
 
 input UserUpdateInput {
   username: String
-  email: String
   name: String
   images: [ImageInput]
   about: String
