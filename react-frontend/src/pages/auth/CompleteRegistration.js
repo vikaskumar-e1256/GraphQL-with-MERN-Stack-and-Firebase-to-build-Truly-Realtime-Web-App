@@ -75,7 +75,7 @@ function CompleteRegistration(props)
                 await userCreate();
 
                 // Redirect after successful login
-                history('/');
+                history('/update/profile');
             }
         } catch (error)
         {

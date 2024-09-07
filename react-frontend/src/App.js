@@ -1,16 +1,18 @@
+import { useContext } from 'react';
 import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
+import { setContext } from '@apollo/client/link/context';
 import Nav from './components/Nav';
 import Home from './pages/Home';
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import CompleteRegistration from './pages/auth/CompleteRegistration';
 import { AuthContext } from "./context/authContext";
-import { useContext } from 'react';
-import { setContext } from '@apollo/client/link/context';
 import PrivateRoute from './components/PrivateRoute';
-import UpdatePassword from './components/forms/auth/UpdatePassword';
+import UpdatePassword from './pages/auth/UpdatePassword';
+import Profile from './pages/auth/Profile';
+import CreatePost from './pages/posts/CreatePost';
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
@@ -51,7 +53,7 @@ function App()
           path="/update/profile"
           element={
             <PrivateRoute>
-              <UpdatePassword />
+              <Profile />
             </PrivateRoute>
           }
         />
@@ -67,7 +69,7 @@ function App()
           path="/create/post"
           element={
             <PrivateRoute>
-              <UpdatePassword />
+              <CreatePost />
             </PrivateRoute>
           }
         />

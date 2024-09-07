@@ -53,7 +53,7 @@ function Login(props)
                 });
 
                 await userCreate();  // Save user info to the database
-                history('/');
+                history('/update/profile');
             }
             else
             {

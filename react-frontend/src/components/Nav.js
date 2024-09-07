@@ -48,6 +48,13 @@ const Nav = () =>
                         <li className="nav-item">
                             <NavLink className="nav-link" aria-current="page" to="/">Home</NavLink>
                         </li>
+
+                        {user && (
+                            <li className="nav-item">
+                                <NavLink className="nav-link" to="/update/profile">Profile</NavLink>
+                            </li>
+                        )}
+
                         {!user && (
                             <>
                             <li className="nav-item">
@@ -61,7 +68,7 @@ const Nav = () =>
 
                         {user && (
                             <li className="nav-item">
-                                <a className="nav-link" onClick={() => logout()}>Logout</a>
+                                <a style={{ 'cursor': 'pointer' }} className="nav-link" onClick={() => logout()}>Logout</a>
                             </li>
                         )}
 
