@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Schema;
 const { v4: uuidv4 } = require('uuid');
+const shortid = require('shortid');
 
 
 const userSchema = mongoose.Schema({
     username: {
         required: true,
         index: true,
-        type: String
+        type: String,
+        unique: true
     },
     name: {
         type: String
@@ -15,13 +17,14 @@ const userSchema = mongoose.Schema({
     email: {
         required: true,
         index: true,
-        type: String
+        type: String,
+        unique: true
     },
     images: {
         type: Array,
         default: {
             url: 'https://placehold.co/200x200.png?text=profile',
-            public_id: uuidv4()
+            public_id: shortid.generate()
         }
     },
     about: {
