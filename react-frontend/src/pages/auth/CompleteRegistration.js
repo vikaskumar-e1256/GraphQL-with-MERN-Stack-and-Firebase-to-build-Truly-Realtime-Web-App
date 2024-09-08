@@ -8,17 +8,8 @@ import { AuthContext } from "../../context/authContext";
 import EmailField from '../../components/common/EmailField';
 import PasswordField from '../../components/common/PasswordField';
 import SubmitButton from '../../components/common/SubmitButton';
+import { SAVE_USER_INTO_DB } from '../../graphql/mutations';
 
-// Define mutation
-const SAVE_USER_INTO_DB = gql`
-  mutation Mutation {
-    userCreate {
-        username
-        email
-
-    }
-  }
-`;
 
 function CompleteRegistration(props)
 {

@@ -1,43 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { gql, useQuery, useMutation } from '@apollo/client';
-const omitDeep = require('omit-deep');
+import { GET_USER_INFO } from '../../graphql/queries';
+import { USER_UPDATE_PROFILE } from '../../graphql/mutations';
 
-
-const USER_COMMON_FIELDS_FRAGMENT = gql`
-  fragment userInfo on User {
-        _id
-        username
-        email
-        name
-        images {
-            url
-            public_id
-        }
-        about
-        createdAt
-        updatedAt
-  }
-`;
-
-// GraphQL query
-const GET_USER_INFO = gql`
-  query Query {
-    profile {
-        ...userInfo
-    }
-  }
-  ${USER_COMMON_FIELDS_FRAGMENT}
-`;
-
-// GraphQL mutation
-const USER_UPDATE_PROFILE = gql`
-  mutation Mutation($input: UserUpdateInput!) {
-    userUpdate(input: $input) {
-        ...userInfo
-    }
-  }
-  ${USER_COMMON_FIELDS_FRAGMENT}
-`;
 
 function Profile(props)
 {
@@ -61,7 +26,7 @@ function Profile(props)
                 name: data.profile.name,
                 email: data.profile.email,
                 about: data.profile.about,
-                images: data.profile.images || omitDeep(data.profile.images, ['__typename'])
+                images: data.profile.images
             });
         }
     }, [data]);
