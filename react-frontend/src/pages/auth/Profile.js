@@ -1,10 +1,29 @@
 import React, { useMemo, useState } from 'react';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from '@apollo/client';
 
-// GraphQL query to fetch posts
+// GraphQL query
 const GET_USER_INFO = gql`
   query Query {
     profile {
+        _id
+        username
+        email
+        name
+        images {
+            url
+            public_id
+        }
+        about
+        createdAt
+        updatedAt
+    }
+  }
+`;
+
+// GraphQL mutation
+const USER_UPDATE_PROFILE = gql`
+  mutation Mutation($input: UserUpdateInput!) {
+    userUpdate(input: $input) {
         _id
         username
         email
@@ -31,6 +50,7 @@ function Profile(props)
     });
 
     const { error, data } = useQuery(GET_USER_INFO);
+    const [userUpdate, { data: mdata, loading, error: merror }] = useMutation(USER_UPDATE_PROFILE);
 
     useMemo(() =>
     {
@@ -51,8 +71,37 @@ function Profile(props)
         setValues({ ...values, [e.target.name]: e.target.value });
     };
 
+    const handleFileChange = (e) =>
+    {
+        const files = Array.from(e.target.files);
+        const updatedImages = files.map(file => ({
+            url: URL.createObjectURL(file),
+            file // Store the actual file for upload purposes
+        }));
+        setValues({ ...values, images: updatedImages });
+    };
+
+    const handleSubmit = (e) =>
+    {
+        e.preventDefault();
+        // You need to handle file uploads here if you're uploading images to a server
+        userUpdate({
+            variables: {
+                input: {
+                    ...values,
+                    images: values.images.map(image => ({
+                        url: image.url // Assuming you're using the `url` for the update
+                    }))
+                },
+            },
+        });
+    };
+
+    if (loading) return 'Submitting...';
+    if (merror) return `Submission error! ${merror.message}`;
+
     const profileUpdateForm = () => (
-        <form>
+        <form onSubmit={handleSubmit}>
             <div className="form-group mb-3">
                 <label htmlFor="username">Username</label>
                 <input
@@ -103,6 +152,18 @@ function Profile(props)
                     onChange={handleChange}
                     placeholder="Tell something about yourself"
                     rows="4"
+                />
+            </div>
+
+            <div className="form-group mb-3">
+                <label htmlFor="images">Image</label>
+                <input
+                    type="file"
+                    name="images"
+                    className="form-control"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    multiple
                 />
             </div>
 
