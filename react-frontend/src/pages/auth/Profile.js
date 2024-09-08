@@ -3,10 +3,8 @@ import { gql, useQuery, useMutation } from '@apollo/client';
 const omitDeep = require('omit-deep');
 
 
-// GraphQL query
-const GET_USER_INFO = gql`
-  query Query {
-    profile {
+const USER_COMMON_FIELDS_FRAGMENT = gql`
+  fragment userInfo on User {
         _id
         username
         email
@@ -18,27 +16,27 @@ const GET_USER_INFO = gql`
         about
         createdAt
         updatedAt
+  }
+`;
+
+// GraphQL query
+const GET_USER_INFO = gql`
+  query Query {
+    profile {
+        ...userInfo
     }
   }
+  ${USER_COMMON_FIELDS_FRAGMENT}
 `;
 
 // GraphQL mutation
 const USER_UPDATE_PROFILE = gql`
   mutation Mutation($input: UserUpdateInput!) {
     userUpdate(input: $input) {
-        _id
-        username
-        email
-        name
-        images {
-            url
-            public_id
-        }
-        about
-        createdAt
-        updatedAt
+        ...userInfo
     }
   }
+  ${USER_COMMON_FIELDS_FRAGMENT}
 `;
 
 function Profile(props)
