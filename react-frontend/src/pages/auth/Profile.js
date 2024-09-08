@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { gql, useQuery, useMutation } from '@apollo/client';
+const omitDeep = require('omit-deep');
+
 
 // GraphQL query
 const GET_USER_INFO = gql`
@@ -61,7 +63,7 @@ function Profile(props)
                 name: data.profile.name,
                 email: data.profile.email,
                 about: data.profile.about,
-                images: data.profile.images
+                images: data.profile.images || omitDeep(data.profile.images, ['__typename'])
             });
         }
     }, [data]);
