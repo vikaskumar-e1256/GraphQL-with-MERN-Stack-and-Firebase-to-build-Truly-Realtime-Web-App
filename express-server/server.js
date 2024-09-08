@@ -5,9 +5,10 @@ const { expressMiddleware } = require('@apollo/server/express4');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cloudinary = require('cloudinary').v2
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
-const { authCheck } = require('./helpers/auth');
+const { authCheck, authCheckMiddleware } = require('./helpers/auth');
 
 // Database Connection
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
@@ -37,7 +38,7 @@ async function startApolloServer()
 
     // Apply middlewares like CORS and body-parser
     app.use(cors());
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({limit: "5mb"}));
 
     // Start Apollo Server
     await server.start();
@@ -54,6 +55,55 @@ async function startApolloServer()
     app.get('/rest', authCheck, (req, res) =>
     {
         res.json({ data: 'Hello from Express server!' });
+    });
+
+    // cloudinary Configuration
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_SECRET_KEY
+    });
+
+    // Upload the image
+    app.post('/uploadimages', authCheckMiddleware, async(req, res) =>
+    {
+        const options = {
+            use_filename: true,
+            unique_filename: false,
+            overwrite: true,
+        };
+
+        try
+        {
+            const imagePath = req.body.image;
+            const result = await cloudinary.uploader.upload(imagePath, options);
+            console.log(result);
+            return result.public_id;
+        } catch (error)
+        {
+            console.error(error);
+        }
+    });
+
+    // Remove the image
+    app.post('/removeimage', authCheckMiddleware, async(req, res) =>
+    {
+        // Return colors in the response
+        const options = {
+            colors: true,
+        };
+
+        try
+        {
+            // Get details about the asset
+            const publicId = req.body.public_id;
+            const result = await cloudinary.api.destroy(publicId, options);
+            console.log(result);
+            return result.colors;
+        } catch (error)
+        {
+            console.error(error);
+        }
     });
 
     // Start the Express server on port 8000
