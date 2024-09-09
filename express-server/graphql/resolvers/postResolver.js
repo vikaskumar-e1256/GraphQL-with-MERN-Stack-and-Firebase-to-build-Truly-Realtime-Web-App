@@ -155,6 +155,8 @@ const singlePost = async (parent, args, { req }) =>
     }
 }
 
+const postCount = async () => await Post.countDocuments().exec();
+
 
 
 module.exports = {
@@ -162,7 +164,8 @@ module.exports = {
         // Add any queries here if needed
         getAllPosts,
         getPostsByUser,
-        singlePost
+        singlePost,
+        postCount
     },
     Mutation: {
         // Post creation mutation

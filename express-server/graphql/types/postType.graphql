@@ -17,6 +17,7 @@ type Query {
   getAllPosts: [Post!]!
   getPostsByUser: [Post!]!
   singlePost(postId: String!): Post!
+  postCount: Int!
 }
 
 # Input Type Definitions
