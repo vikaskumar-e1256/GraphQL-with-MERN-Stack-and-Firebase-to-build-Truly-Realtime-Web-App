@@ -131,11 +131,26 @@ const postDelete = async (parent, args, { req }) =>
     }
 }
 
+const singlePost = async (parent, args, { req }) =>
+{
+    try
+    {
+        return await Post.find({ _id: args.postId }).populate('postedBy', '_id username').exec();
+
+    } catch (error)
+    {
+        throw new Error(`Failed to fetch single post: ${error.message}`);
+    }
+}
+
+
+
 module.exports = {
     Query: {
         // Add any queries here if needed
         getAllPosts,
-        getPostsByUser
+        getPostsByUser,
+        singlePost
     },
     Mutation: {
         // Post creation mutation
