@@ -45,3 +45,12 @@ export const GET_USER_BY_USERNAME = gql`
   }
   ${USER_COMMON_FIELDS_FRAGMENT}
 `;
+
+export const GET_SINGLE_POST = gql`
+  query Query($postId: String!) {
+    singlePost(postId: $postId) {
+       ...postInfo
+    }
+  }
+  ${POST_COMMON_FIELDS_FRAGMENT}
+`;

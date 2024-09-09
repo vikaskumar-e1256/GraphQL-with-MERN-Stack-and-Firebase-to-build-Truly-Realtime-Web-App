@@ -4,6 +4,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../context/authContext';
 import { GET_POSTS } from '../graphql/queries';
 import moment from 'moment'; // For formatting date
+import { Link } from 'react-router-dom';
 
 
 function Home()
@@ -27,11 +28,13 @@ function Home()
                 {data.getAllPosts.map((post) => (
                     <div className="col-md-4" key={post.id}>
                         <div className="card mb-4">
+                            <Link to={`/post/${post.id}`}>
                             <img
                                 src={post.image ? post.image.url : 'https://via.placeholder.com/150'}
                                 alt={post.content}
                                 className="card-img-top"
-                            />
+                                />
+                            </Link>
                             <div className="card-body">
                                 <h5 className="card-title">{post.content.slice(0, 50)}...</h5>
                                 <p className="card-text">Posted by {post.postedBy.username}</p>

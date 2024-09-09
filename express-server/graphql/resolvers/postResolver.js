@@ -147,7 +147,7 @@ const singlePost = async (parent, args, { req }) =>
 
     try
     {
-        return await Post.find({ _id: args.postId }).populate('postedBy', '_id username').exec();
+        return await Post.findOne({ _id: args.postId }).populate('postedBy', '_id username').exec();
 
     } catch (error)
     {
