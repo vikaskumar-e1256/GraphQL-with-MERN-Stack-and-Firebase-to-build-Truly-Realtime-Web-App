@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client';
 import { AuthContext } from '../context/authContext';
 import { GET_USERS } from '../graphql/queries';
 import { useContext } from 'react';
+import { Link } from 'react-router-dom';
 
 function Users()
 {
@@ -33,7 +34,7 @@ function Users()
                                         style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                                     />
                                 )}
-                                <h5 className="card-title">{user.username}</h5>
+                                <Link to={`/user/${user.username}`} className="card-title">{user.username}</Link>
                                 <p className="card-text">{user.about ? user.about : "No description available"}</p>
                                 <p className="card-text text-muted">{user.email}</p>
                             </div>

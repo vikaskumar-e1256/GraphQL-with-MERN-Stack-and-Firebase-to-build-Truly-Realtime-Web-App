@@ -28,3 +28,12 @@ export const GET_USERS = gql`
   }
   ${USER_COMMON_FIELDS_FRAGMENT}
 `;
+
+export const GET_USER_BY_USERNAME = gql`
+  query Query($username: String!) {
+    getProfile(username: $username) {
+       ...userInfo
+    }
+  }
+  ${USER_COMMON_FIELDS_FRAGMENT}
+`;
