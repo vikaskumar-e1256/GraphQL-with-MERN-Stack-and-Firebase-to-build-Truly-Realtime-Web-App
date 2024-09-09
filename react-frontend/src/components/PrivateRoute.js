@@ -1,11 +1,26 @@
 import { Navigate, Link } from "react-router-dom";
 import { AuthContext } from '../context/authContext';
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 const PrivateRoute = ({ children }) =>
 {
     const { state } = useContext(AuthContext);
     const { user } = state;
+
+    const [countdown, setCountdown] = useState(5); // Set initial countdown to 5 seconds
+
+    useEffect(() =>
+    {
+        if (!user)
+        {
+            const timer = setInterval(() =>
+            {
+                setCountdown((prev) => prev - 1);
+            }, 1000); // Decrease countdown every second
+
+            return () => clearInterval(timer); // Cleanup timer on unmount
+        }
+    }, [user]);
 
     // If user is authenticated, render the child components
     if (user)
@@ -36,8 +51,18 @@ const PrivateRoute = ({ children }) =>
         );
     }
 
-    // If user is not authenticated, show loading or redirect
-    return <Navigate to="/login" />;
+    // If countdown reaches 0, redirect to login
+    if (countdown === 0)
+    {
+        return <Navigate to="/login" />;
+    }
+
+    // Display loading message and countdown
+    return (
+        <div className="container text-center pt-5">
+            <p>Redirecting to login in {countdown} seconds...</p>
+        </div>
+    );
 };
 
 export default PrivateRoute;
