@@ -14,7 +14,7 @@ type Post {
 
 # Root Query type to handle fetching data related to posts.
 type Query {
-  getAllPosts: [Post!]!
+  getAllPosts(page: Int!): [Post!]!
   getPostsByUser: [Post!]!
   singlePost(postId: String!): Post!
   postCount: Int!

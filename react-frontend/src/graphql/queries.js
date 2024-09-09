@@ -20,8 +20,8 @@ export const GET_POSTS_BY_USER = gql`
 `;
 
 export const GET_POSTS = gql`
-  query Query {
-    getAllPosts {
+  query Query($page: Int!) {
+    getAllPosts(page: $page) {
         ...postInfo
     }
   }
@@ -53,4 +53,10 @@ export const GET_SINGLE_POST = gql`
     }
   }
   ${POST_COMMON_FIELDS_FRAGMENT}
+`;
+
+export const TOTAL_POST_COUNT = gql`
+  query {
+    postCount
+  }
 `;

@@ -6,15 +6,28 @@ const { authCheck } = require('../../helpers/auth');
 // Query: fetch all posts
 const getAllPosts = async (parent, args, { req }) =>
 {
+    // Set default pagination values
+    const currentPage = args.page || 1;
+    const perPage = 6; // Number of posts per page
+
     try
     {
-        return await Post.find().populate('postedBy', '_id username').exec();
+        // Query the database to retrieve posts with pagination
+        const posts = await Post.find()
+            .skip((currentPage - 1) * perPage)  // Skip posts to implement pagination
+            .limit(perPage)                     // Limit the number of posts per page
+            .populate('postedBy', '_id username') // Populate the 'postedBy' field with user details
+            .sort({ createdAt: -1 })            // Order by createdAt desc
+            .exec();                            // Execute the query
 
+        return posts;
     } catch (error)
     {
-        throw new Error(`Failed to create post: ${error.message}`);
+        // Log the error and throw a new custom error
+        console.error(`Error fetching posts: ${error.message}`);
+        throw new Error(`Failed to retrieve posts: ${error.message}`);
     }
-}
+};
 
 const getPostsByUser = async (parent, args, { req }) =>
 {
