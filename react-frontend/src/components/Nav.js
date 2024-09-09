@@ -48,6 +48,9 @@ const Nav = () =>
                         <li className="nav-item">
                             <NavLink className="nav-link" aria-current="page" to="/">Home</NavLink>
                         </li>
+                        <li className="nav-item">
+                            <NavLink className="nav-link" aria-current="page" to="/users">Users</NavLink>
+                        </li>
 
                         {user && (
                             <li className="nav-item">

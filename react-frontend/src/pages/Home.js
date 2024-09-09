@@ -1,17 +1,8 @@
 import { gql, useQuery, useLazyQuery } from '@apollo/client';
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/authContext';
+import { GET_POSTS } from '../graphql/queries';
 
-// GraphQL query to fetch posts
-const GET_POSTS = gql`
-  query Query {
-    all_posts {
-      id
-      title
-      description
-    }
-  }
-`;
 
 function Home()
 {

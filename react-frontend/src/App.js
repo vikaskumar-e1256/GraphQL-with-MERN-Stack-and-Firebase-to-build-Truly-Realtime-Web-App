@@ -15,6 +15,7 @@ import Profile from './pages/auth/Profile';
 import CreatePost from './pages/posts/CreatePost';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import PublicRoute from './components/PublicRoute';
+import Users from './pages/Users';
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
@@ -50,6 +51,7 @@ function App()
 
         {/* Global Routes */}
         <Route path='/' element={<Home />} />
+        <Route path='/users' element={<Users />} />
         <Route path='/complete-registration' element={<CompleteRegistration />} />
 
         {/* Public Routes */}
