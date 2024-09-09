@@ -44,4 +44,5 @@ type Mutation {
 type Query {
   profile: User!
   getProfile(username: String!): User!
+  allUsers: [User!]
 }

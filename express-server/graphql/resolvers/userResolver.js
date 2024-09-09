@@ -39,10 +39,16 @@ const getProfile = async (parent, args, { req, res }) =>
 
 }
 
+const allUsers = async (parent, args, { req, res }) =>
+{
+    return await User.find().exec();
+}
+
 module.exports = {
     Query: {
         profile,
-        getProfile
+        getProfile,
+        allUsers
     },
     Mutation: {
         userCreate,
