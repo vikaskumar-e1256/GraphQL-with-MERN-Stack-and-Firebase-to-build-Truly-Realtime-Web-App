@@ -1,22 +1,31 @@
+# Type Definitions
+
+# The Post type represents a single post, including content, image, and the user who posted it.
 type Post {
   id: ID!
-  title: String!
-  description: String!
+  content: String!
+  image: Image # Reusing 'Image' type from userType file as we are merging all types.
+  postedBy: User # Reusing 'User' type from userType file as we are merging all types.
 }
 
-# Query Part
-type Query {
-  total_posts: Int!
-  all_posts: [Post!]!
+# Query Definitions
+
+# Root Query type to handle fetching data related to posts.
+#type Query {
+
+#}
+
+# Input Type Definitions
+
+# Input type for creating a post. It includes content and an image.
+input PostCreateInput {
+  content: String!
+  image: ImageInput # Reusing 'ImageInput' type from userType file as we are merging all types.
 }
 
-# Input type
-input PostInput {
-  title: String!
-  description: String!
-}
+# Mutation Definitions
 
-# Mutation Part
 type Mutation {
-  newPost(input: PostInput): Post!
+  # Create a new post with the given input, returning the created Post object
+  postCreate(input: PostCreateInput!): Post!
 }

@@ -1,34 +1,50 @@
-const { posts } = require('../../temp');
+const User = require('../../models/user');
+const Post = require('../../models/post');
 const { authCheck } = require('../../helpers/auth');
 
-// Query Part
-const postsCount = () => posts.length;
-const data = async (parent, args, { req, res }) =>
+// Mutation: Create a new post
+const postCreate = async (parent, args, { req }) =>
 {
-    // await authCheck(req);
-    return posts;
-};
+    try
+    {
+        const currentUser = await authCheck(req);
 
-// Mutation Part
-const createPost = (parent, args) =>
-{
-    console.log(parent, '-', args);
-    const { title, description } = args.input;
-    const post = {
-        id: posts.length + 1,
-        title: title,
-        description: description
+        if (!currentUser)
+        {
+            throw new Error('User not authenticated');
+        }
+
+        const findUserInDb = await User.findOne({ email: currentUser.email }).exec();
+
+        if (!findUserInDb)
+        {
+            throw new Error('User not found');
+        }
+
+        if (args.input.content.trim() === '') throw new Error('Content is required!');
+
+        const newPost = await new Post({
+            ...args.input,               // Destructure and spread input fields (content, image)
+            postedBy: findUserInDb._id   // Associate the post with the authenticated user
+        }).save();
+
+        // Populate the 'postedBy' field with user's id and username
+        await newPost.populate('postedBy', '_id username');
+
+        return newPost;
+
+    } catch (error)
+    {
+        throw new Error(`Failed to create post: ${error.message}`);
     }
-    posts.push(post);
-    return post;
 }
 
 module.exports = {
     Query: {
-        total_posts: postsCount,
-        all_posts: data
+        // Add any queries here if needed
     },
     Mutation: {
-        newPost: createPost
+        // Post creation mutation
+        postCreate
     }
 }

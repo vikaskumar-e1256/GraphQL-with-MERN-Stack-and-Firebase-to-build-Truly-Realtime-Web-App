@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const { ObjectId } = mongoose.Schema();
+const { ObjectId } = mongoose.Schema;
 
-const postSchema = mongoose.Schema({
+const postSchema = new mongoose.Schema({
 
     content: {
         type: String,
@@ -9,10 +9,12 @@ const postSchema = mongoose.Schema({
     },
     image: {
         url: {
+            type: String,
             default: 'https://placehold.co/400x400.png?text=post'
         },
         public_id: {
-            default: Date.now()
+            type: String,
+            default: Date.now().toString()
         }
     },
     postedBy: {
