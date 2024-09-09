@@ -65,7 +65,7 @@ async function startApolloServer()
     });
 
     // Upload the image
-    app.post('/uploadimages', authCheckMiddleware, async(req, res) =>
+    app.post('/uploadimage', authCheckMiddleware, async(req, res) =>
     {
         const options = {
             use_filename: true,
@@ -78,7 +78,7 @@ async function startApolloServer()
             const imagePath = req.body.image;
             const result = await cloudinary.uploader.upload(imagePath, options);
             console.log(result);
-            return result.public_id;
+            res.send(result);
         } catch (error)
         {
             console.error(error);
@@ -97,9 +97,9 @@ async function startApolloServer()
         {
             // Get details about the asset
             const publicId = req.body.public_id;
-            const result = await cloudinary.api.destroy(publicId, options);
+            const result = await cloudinary.uploader.destroy(publicId, options);
             console.log(result);
-            return result.colors;
+            res.send(result);
         } catch (error)
         {
             console.error(error);
