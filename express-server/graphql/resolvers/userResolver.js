@@ -24,7 +24,6 @@ const userUpdate = async (parent, args, { req, res }) =>
 
 }
 
-
 const profile = async (parent, args, { req, res }) =>
 {
     const currentUser = await authCheck(req);
@@ -33,9 +32,17 @@ const profile = async (parent, args, { req, res }) =>
 
 }
 
+const getProfile = async (parent, args, { req, res }) =>
+{
+    const query = { username: args.username };
+    return await User.findOne(query).exec();
+
+}
+
 module.exports = {
     Query: {
-        profile
+        profile,
+        getProfile
     },
     Mutation: {
         userCreate,
