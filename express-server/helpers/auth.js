@@ -12,7 +12,7 @@ exports.authCheck = async (req) =>
     try
     {
         const currentUser = await admin.auth().verifyIdToken(req.headers.authtoken);
-        console.log(currentUser);
+        // console.log(currentUser);
         return currentUser;
     } catch (error)
     {

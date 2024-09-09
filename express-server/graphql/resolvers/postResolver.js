@@ -119,7 +119,7 @@ const postDelete = async (parent, args, { req }) =>
 
         if (!findUserInDb) throw new Error('User not found');
 
-        const postToDelete = await Post.find({ _id: args.postId }).exec();
+        const postToDelete = await Post.findById(args.postId).exec();
 
         if (postToDelete.postedBy._id.toString() !== findUserInDb._id.toString()) throw new Error('Unauthorized action!');
 
@@ -133,6 +133,7 @@ const postDelete = async (parent, args, { req }) =>
 
 const singlePost = async (parent, args, { req }) =>
 {
+
     try
     {
         return await Post.find({ _id: args.postId }).populate('postedBy', '_id username').exec();

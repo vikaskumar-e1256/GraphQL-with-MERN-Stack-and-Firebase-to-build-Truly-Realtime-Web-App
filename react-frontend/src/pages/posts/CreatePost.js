@@ -4,7 +4,7 @@ import axios from 'axios';
 import Resizer from 'react-image-file-resizer'; // Ensure you have installed this package
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../context/authContext';
-import { POST_CREATE } from '../../graphql/mutations';
+import { POST_CREATE, POST_DELETE } from '../../graphql/mutations';
 import { GET_POSTS_BY_USER } from '../../graphql/queries';
 import moment from 'moment'; // For formatting date
 
@@ -55,9 +55,39 @@ function CreatePost()
         refetchQueries: [{ query: GET_POSTS_BY_USER }] // Refetch posts after creation
     });
 
+    const [postDelete] = useMutation(POST_DELETE, {
+        onCompleted: () =>
+        {
+            toast.success('Post deleted successfully!');
+        },
+        onError: (error) =>
+        {
+            toast.error(`Error deleting post: ${error.message}`);
+            setLoading(false);
+        },
+        refetchQueries: [{ query: GET_POSTS_BY_USER }] // Refetch posts after creation
+    });
+
     const handleChange = (e) =>
     {
         setValues({ ...values, [e.target.name]: e.target.value });
+    };
+
+    const handleDeletePost = async (postId) =>
+    {
+        console.log(postId);
+        setLoading(true);
+        try
+        {
+            await postDelete({
+                variables: {
+                    postId
+                },
+            });
+        } catch (error)
+        {
+            setLoading(false);
+        }
     };
 
     const handleSubmit = async (e) =>
@@ -225,6 +255,19 @@ function CreatePost()
                                         </small>
                                     </p>
                                 </div>
+                                <button
+                                    className='btn btn-primary mt-3'
+                                    type='submit'
+                                >
+                                    Update
+                                </button>
+                                <button
+                                    onClick={() => handleDeletePost(post.id)}
+                                    className='btn btn-danger mt-3'
+                                    type='submit'
+                                >
+                                    Delete
+                                </button>
                             </div>
                         </div>
                     ))
