@@ -14,8 +14,8 @@ type Post {
 
 # Root Query type to handle fetching data related to posts.
 type Query {
-  # Fetch all posts, returning an array of Post objects
   getAllPosts: [Post!]!
+  getPostsByUser: [Post!]!
 }
 
 # Input Type Definitions
