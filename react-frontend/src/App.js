@@ -14,6 +14,7 @@ import UpdatePassword from './pages/auth/UpdatePassword';
 import Profile from './pages/auth/Profile';
 import CreatePost from './pages/posts/CreatePost';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import PublicRoute from './components/PublicRoute';
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
@@ -46,11 +47,38 @@ function App()
       <Nav />
       <ToastContainer />
       <Routes>
+
+        {/* Global Routes */}
         <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
         <Route path='/complete-registration' element={<CompleteRegistration />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
+
+        {/* Public Routes */}
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
+        {/* Private Routes */}
         <Route
           path="/update/profile"
           element={
