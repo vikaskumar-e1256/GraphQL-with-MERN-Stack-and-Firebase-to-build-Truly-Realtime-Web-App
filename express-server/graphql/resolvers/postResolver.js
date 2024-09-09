@@ -2,6 +2,19 @@ const User = require('../../models/user');
 const Post = require('../../models/post');
 const { authCheck } = require('../../helpers/auth');
 
+// Query: fetch all posts
+const getAllPosts = async (parent, args, { req }) =>
+{
+    try
+    {
+        return await Post.find().populate('postedBy', '_id username').exec();
+
+    } catch (error)
+    {
+        throw new Error(`Failed to create post: ${error.message}`);
+    }
+}
+
 // Mutation: Create a new post
 const postCreate = async (parent, args, { req }) =>
 {
@@ -42,6 +55,7 @@ const postCreate = async (parent, args, { req }) =>
 module.exports = {
     Query: {
         // Add any queries here if needed
+        getAllPosts
     },
     Mutation: {
         // Post creation mutation

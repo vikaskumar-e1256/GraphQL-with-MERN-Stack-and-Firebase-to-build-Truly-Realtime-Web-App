@@ -4,6 +4,8 @@
 type Post {
   id: ID!
   content: String!
+  createdAt: DateTime # We can use more scaler. npm package 'graphql-scalars'
+  updatedAt: DateTime # We can use more scaler. npm package 'graphql-scalars'
   image: Image # Reusing 'Image' type from userType file as we are merging all types.
   postedBy: User # Reusing 'User' type from userType file as we are merging all types.
 }
@@ -11,9 +13,10 @@ type Post {
 # Query Definitions
 
 # Root Query type to handle fetching data related to posts.
-#type Query {
-
-#}
+type Query {
+  # Fetch all posts, returning an array of Post objects
+  getAllPosts: [Post!]!
+}
 
 # Input Type Definitions
 
