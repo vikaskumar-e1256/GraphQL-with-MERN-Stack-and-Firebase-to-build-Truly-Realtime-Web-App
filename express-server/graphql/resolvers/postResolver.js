@@ -81,6 +81,56 @@ const postCreate = async (parent, args, { req }) =>
     }
 }
 
+const postUpdate = async (parent, args, { req }) =>
+{
+    try
+    {
+        const currentUser = await authCheck(req);
+
+        if (!currentUser) throw new Error('User not authenticated');
+
+        if (args.input.content.trim() === '') throw new Error('Content is required!');
+
+        const findUserInDb = await User.findOne({ email: currentUser.email }).exec();
+
+        if (!findUserInDb) throw new Error('User not found');
+
+        const postToUpdate = await Post.find({_id: args.input._id}).exec();
+
+        if (postToUpdate.postedBy._id.toString() !== findUserInDb._id.toString()) throw new Error('Unauthorized action!');
+
+        return await Post.findOneAndUpdate({ _id: args.input._id }, { ...args.input }, { new: true });
+
+    } catch (error)
+    {
+        throw new Error(`Failed to update post: ${error.message}`);
+    }
+}
+
+const postDelete = async (parent, args, { req }) =>
+{
+    try
+    {
+        const currentUser = await authCheck(req);
+
+        if (!currentUser) throw new Error('User not authenticated');
+
+        const findUserInDb = await User.findOne({ email: currentUser.email }).exec();
+
+        if (!findUserInDb) throw new Error('User not found');
+
+        const postToDelete = await Post.find({ _id: args.postId }).exec();
+
+        if (postToDelete.postedBy._id.toString() !== findUserInDb._id.toString()) throw new Error('Unauthorized action!');
+
+        return await Post.findOneAndDelete({ _id: args.postId });
+
+    } catch (error)
+    {
+        throw new Error(`Failed to delete post: ${error.message}`);
+    }
+}
+
 module.exports = {
     Query: {
         // Add any queries here if needed
@@ -89,6 +139,8 @@ module.exports = {
     },
     Mutation: {
         // Post creation mutation
-        postCreate
+        postCreate,
+        postUpdate,
+        postDelete
     }
 }

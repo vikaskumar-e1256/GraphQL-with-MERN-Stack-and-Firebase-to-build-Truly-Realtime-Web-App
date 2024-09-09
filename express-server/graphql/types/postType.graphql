@@ -25,10 +25,17 @@ input PostCreateInput {
   content: String!
   image: ImageInput # Reusing 'ImageInput' type from userType file as we are merging all types.
 }
+input PostUpdateInput {
+  _id: String!
+  content: String!
+  image: ImageInput # Reusing 'ImageInput' type from userType file as we are merging all types.
+}
 
 # Mutation Definitions
 
 type Mutation {
   # Create a new post with the given input, returning the created Post object
   postCreate(input: PostCreateInput!): Post!
+  postUpdate(input: PostUpdateInput!): Post!
+  postDelete(postId: String!): Post!
 }
