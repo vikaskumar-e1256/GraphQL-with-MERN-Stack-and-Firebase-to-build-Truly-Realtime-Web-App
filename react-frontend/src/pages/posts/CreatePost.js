@@ -1,10 +1,13 @@
 import React, { useState, useContext } from 'react';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import axios from 'axios';
 import Resizer from 'react-image-file-resizer'; // Ensure you have installed this package
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../context/authContext';
 import { POST_CREATE } from '../../graphql/mutations';
+import { GET_POSTS_BY_USER } from '../../graphql/queries';
+import moment from 'moment'; // For formatting date
+
 
 const resizeFile = (file) =>
     new Promise((resolve) =>
@@ -30,9 +33,13 @@ function CreatePost()
     const { user } = state;
     const [loading, setLoading] = useState(false);
     const [values, setValues] = useState({
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fermentum fermentum blandit. Fusce eleifend efficitur mauris, sit amet vulputate risus vestibulum et. Aliquam rhoncus nisi eu tincidunt laoreet. Phasellus non justo tortor. Maecenas nibh risus, feugiat sed magna sit amet, varius suscipit eros. Proin pharetra gravida enim consectetur dignissim. Morbi vel efficitur nibh. Donec vel vehicula dui. Nullam vel pharetra dui, vitae egestas libero. Integer tempor metus eu felis congue ornare. Fusce porta fringilla nunc, vitae efficitur est consequat at. Nulla fermentum eget nunc eu pulvinar. Suspendisse consequat, nunc id feugiat tristique, sem tellus commodo mi, vitae pellentesque arcu leo a turpis. Aliquam erat volutpat. Cras sodales ornare eros, et laoreet magna bibendum sed. Duis in mattis neque. Sed commodo, tellus id bibendum malesuada, nunc lectus eleifend augue, vel facilisis odio turpis ut justo. Duis blandit dui ut velit venenatis, ac pretium felis sollicitudin. Nulla ut lobortis ligula. Fusce luctus purus eget auctor tempor. Nunc mi metus, imperdiet sed fringilla varius, scelerisque quis sapien. Sed ut lorem eu enim suscipit ornare id quis ex. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Duis lobortis, massa sed dapibus laoreet, dui mi pellentesque eros, eu vestibulum nisi neque imperdiet erat. Pellentesque pellentesque dapibus elit quis aliquam. Morbi dapibus, lectus vitae dictum condimentum, purus lorem fermentum dolor, ac convallis augue felis sed sapien.',
+        content: '',
         images: []
     });
+
+    // Fetch posts by the current user
+    const { data, loading: postsLoading, error } = useQuery(GET_POSTS_BY_USER);
+
     const [postCreate] = useMutation(POST_CREATE, {
         onCompleted: () =>
         {
@@ -45,6 +52,7 @@ function CreatePost()
             toast.error(`Error creating post: ${error.message}`);
             setLoading(false);
         },
+        refetchQueries: [{ query: GET_POSTS_BY_USER }] // Refetch posts after creation
     });
 
     const handleChange = (e) =>
@@ -193,6 +201,37 @@ function CreatePost()
                     {loading ? '...' : 'Create Post'}
                 </button>
             </form>
+            <hr />
+            <div className="row">
+                {postsLoading ? (
+                    <p>Loading posts...</p>
+                ) : error ? (
+                    <p>Error loading posts: {error.message}</p>
+                ) : data.getPostsByUser.length > 0 ? (
+                    data.getPostsByUser.map((post) => (
+                        <div className="col-md-4" key={post.id}>
+                            <div className="card mb-4">
+                                <img
+                                    src={post.image ? post.image.url : 'https://via.placeholder.com/150'}
+                                    alt={post.content}
+                                    className="card-img-top"
+                                />
+                                <div className="card-body">
+                                    <h5 className="card-title">{post.content.slice(0, 50)}...</h5>
+                                    <p className="card-text">Posted by {post.postedBy.username}</p>
+                                    <p className="card-text">
+                                        <small className="text-muted">
+                                            {moment(post.createdAt).fromNow()}
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p>No posts found</p>
+                )}
+            </div>
         </div>
     );
 }

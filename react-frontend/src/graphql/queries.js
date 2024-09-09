@@ -10,6 +10,15 @@ export const GET_USER_INFO = gql`
   ${USER_COMMON_FIELDS_FRAGMENT}
 `;
 
+export const GET_POSTS_BY_USER = gql`
+  query Query {
+    getPostsByUser {
+        ...postInfo
+    }
+  }
+  ${POST_COMMON_FIELDS_FRAGMENT}
+`;
+
 export const GET_POSTS = gql`
   query Query {
     getAllPosts {
