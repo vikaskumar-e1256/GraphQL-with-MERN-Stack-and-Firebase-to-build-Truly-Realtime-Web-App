@@ -10,6 +10,15 @@ export const POST_CREATE = gql`
   ${POST_COMMON_FIELDS_FRAGMENT}
 `;
 
+export const POST_UPDATE = gql`
+  mutation Mutation($input: PostUpdateInput!) {
+    postUpdate(input: $input) {
+        ...postInfo
+    }
+  }
+  ${POST_COMMON_FIELDS_FRAGMENT}
+`;
+
 export const POST_DELETE = gql`
   mutation Mutation($postId: String!) {
     postDelete(postId: $postId) {

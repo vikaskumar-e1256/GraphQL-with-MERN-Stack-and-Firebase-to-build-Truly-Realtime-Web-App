@@ -91,21 +91,32 @@ const postUpdate = async (parent, args, { req }) =>
 
         if (args.input.content.trim() === '') throw new Error('Content is required!');
 
+        // Find user in the database
         const findUserInDb = await User.findOne({ email: currentUser.email }).exec();
-
         if (!findUserInDb) throw new Error('User not found');
 
-        const postToUpdate = await Post.find({_id: args.input._id}).exec();
+        // Find the post to be updated
+        const postToUpdate = await Post.findOne({ _id: args.input._id }).populate('postedBy').exec();
+        if (!postToUpdate) throw new Error('Post not found');
 
-        if (postToUpdate.postedBy._id.toString() !== findUserInDb._id.toString()) throw new Error('Unauthorized action!');
+        // Check if the logged-in user is the owner of the post
+        if (postToUpdate.postedBy._id.toString() !== findUserInDb._id.toString())
+        {
+            throw new Error('Unauthorized action!');
+        }
 
-        return await Post.findOneAndUpdate({ _id: args.input._id }, { ...args.input }, { new: true });
+        // Update the post and return the updated document
+        return await Post.findOneAndUpdate(
+            { _id: args.input._id },      // Query to find the document by _id
+            { $set: { ...args.input } },   // Use $set to update fields
+            { new: true }                  // Return the updated document
+        );
 
     } catch (error)
     {
         throw new Error(`Failed to update post: ${error.message}`);
     }
-}
+};
 
 const postDelete = async (parent, args, { req }) =>
 {
