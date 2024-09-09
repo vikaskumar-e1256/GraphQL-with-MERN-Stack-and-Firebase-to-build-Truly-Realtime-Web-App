@@ -1,53 +1,54 @@
-import { gql, useQuery, useLazyQuery } from '@apollo/client';
-import { useEffect, useState, useContext } from 'react';
+import { gql, useQuery } from '@apollo/client';
+import { toast } from 'react-toastify';
+import { useContext } from 'react';
 import { AuthContext } from '../context/authContext';
 import { GET_POSTS } from '../graphql/queries';
+import moment from 'moment'; // For formatting date
 
 
 function Home()
 {
     const { state, dispatch } = useContext(AuthContext);
-    // Use Apollo Client's useQuery hook to fetch data
     const { loading, error, data } = useQuery(GET_POSTS);
 
-    // Use Apollo Client's useLazyQuery hook to fetch data
-    const [fire, { data: all_posts }] = useLazyQuery(GET_POSTS);
-
-    // Handling the loading and error states outside of the useEffect hook
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error! {error.message}</p>;
-
-    const changeUserName = () =>
+    // Handle error with toast
+    if (error)
     {
-        dispatch({
-            type: 'LOGGED_IN_USER',
-            payload: 'Vikas Kumar'
-        });
+        toast.error(`Error: ${error.message}`);
+        return <p>Error! {error.message}</p>;
     }
+
+    // Handle loading state
+    if (loading) return <p>Loading...</p>;
 
     return (
         <div className='container p-5'>
             <div className="row">
-                {data.all_posts.map((post) => (
+                {data.getAllPosts.map((post) => (
                     <div className="col-md-4" key={post.id}>
                         <div className="card mb-4">
+                            <img
+                                src={post.image ? post.image.url : 'https://via.placeholder.com/150'}
+                                alt={post.content}
+                                className="card-img-top"
+                            />
                             <div className="card-body">
-                                <h5 className="card-title">{post.title}</h5>
-                                <p className="card-text">{post.description}</p>
+                                <h5 className="card-title">{post.content.slice(0, 50)}...</h5>
+                                <p className="card-text">Posted by {post.postedBy.username}</p>
+                                <p className="card-text">
+                                    <small className="text-muted">
+                                        {moment(post.createdAt).fromNow()}
+                                    </small>
+                                </p>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-            <div className='p-5'>
-                <button onClick={() => fire()}>Fetch</button>
-            </div>
-            {JSON.stringify(all_posts)}
+
+            {/* Debugging (Optional) */}
             <hr />
             {JSON.stringify(state.user)}
-            <div className='p-5'>
-                <button onClick={changeUserName}>Change user name</button>
-            </div>
         </div>
     );
 }

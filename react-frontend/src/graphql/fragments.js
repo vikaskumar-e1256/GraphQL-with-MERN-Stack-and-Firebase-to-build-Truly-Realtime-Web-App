@@ -15,3 +15,20 @@ export const USER_COMMON_FIELDS_FRAGMENT = gql`
         updatedAt
   }
 `;
+
+export const POST_COMMON_FIELDS_FRAGMENT = gql`
+  fragment postInfo on Post {
+      id
+      image {
+        url
+        public_id
+      }
+      postedBy {
+        username
+        _id
+      }
+      content
+      createdAt
+      updatedAt
+  }
+`;
