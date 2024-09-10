@@ -123,11 +123,15 @@ const postUpdate = async (parent, args, { req }) =>
         }
 
         // Update the post and return the updated document
-        return await Post.findOneAndUpdate(
+        const updatedPost =  await Post.findOneAndUpdate(
             { _id: args.input._id },      // Query to find the document by _id
             { $set: { ...args.input } },   // Use $set to update fields
             { new: true }                  // Return the updated document
         );
+
+        // Publish the postUpdated event
+        pubsub.publish('POST_UPDATED', { postUpdated: updatedPost });
+        return updatedPost;
 
     } catch (error)
     {
@@ -151,7 +155,10 @@ const postDelete = async (parent, args, { req }) =>
 
         if (postToDelete.postedBy._id.toString() !== findUserInDb._id.toString()) throw new Error('Unauthorized action!');
 
-        return await Post.findOneAndDelete({ _id: args.postId });
+        const deletedPost = await Post.findOneAndDelete({ _id: args.postId });
+        // Publish the postUpdated event
+        pubsub.publish('POST_DELETED', { postDeleted: deletedPost });
+        return deletedPost;
 
     } catch (error)
     {
@@ -214,6 +221,12 @@ module.exports = {
     Subscription: {
         postAdded: {
             subscribe: () => pubsub.asyncIterator('POST_CREATED'),
+        },
+        postUpdated: {
+            subscribe: () => pubsub.asyncIterator('POST_UPDATED'),
+        },
+        postDeleted: {
+            subscribe: () => pubsub.asyncIterator('POST_DELETED'),
         }
     }
 }

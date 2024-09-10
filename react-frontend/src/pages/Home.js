@@ -5,7 +5,7 @@ import { AuthContext } from '../context/authContext';
 import { GET_POSTS, TOTAL_POST_COUNT } from '../graphql/queries';
 import moment from 'moment'; // For formatting date
 import { Link } from 'react-router-dom';
-import { POST_ADDED } from '../graphql/subscriptions';
+import { POST_ADDED, POST_UPDATED, POST_DELETED } from '../graphql/subscriptions';
 
 function Home()
 {
@@ -22,8 +22,9 @@ function Home()
 
     // Fetch total post count for pagination
     const { data: postCountData } = useQuery(TOTAL_POST_COUNT);
-    // Subscription to handle new posts
-    const { data: addedPost } = useSubscription(POST_ADDED, {
+
+    // Subscription to handle new posts (POST_ADDED)
+    useSubscription(POST_ADDED, {
         onSubscriptionData: ({ client, subscriptionData }) =>
         {
             const newPost = subscriptionData.data.postAdded;
@@ -43,13 +44,80 @@ function Home()
                 },
             });
 
-            // Optionally, update total post count in the cache
+            // Update total post count in the cache
             if (postCountData)
             {
                 client.writeQuery({
                     query: TOTAL_POST_COUNT,
                     data: {
                         postCount: postCountData.postCount + 1, // Increment the post count
+                    },
+                });
+            }
+        },
+    });
+
+    // Subscription to handle post updates (POST_UPDATED)
+    useSubscription(POST_UPDATED, {
+        onSubscriptionData: ({ client, subscriptionData }) =>
+        {
+            const updatedPost = subscriptionData.data.postUpdated;
+
+            // Read the cache
+            const existingPosts = client.readQuery({
+                query: GET_POSTS,
+                variables: { page: 1 }, // Or any other page
+            });
+
+            // Find and update the post in the cache
+            const updatedPosts = existingPosts.getAllPosts.map((post) =>
+                post.id === updatedPost.id ? updatedPost : post
+            );
+
+            // Write updated post list back to the cache
+            client.writeQuery({
+                query: GET_POSTS,
+                variables: { page: 1 },
+                data: {
+                    getAllPosts: updatedPosts,
+                },
+            });
+        },
+    });
+
+    // Subscription to handle post deletions (POST_DELETED)
+    useSubscription(POST_DELETED, {
+        onSubscriptionData: ({ client, subscriptionData }) =>
+        {
+            const deletedPostId = subscriptionData.data.postDeleted.id;
+
+            // Read the cache
+            const existingPosts = client.readQuery({
+                query: GET_POSTS,
+                variables: { page: 1 }, // Or the current page
+            });
+
+            // Filter out the deleted post
+            const remainingPosts = existingPosts.getAllPosts.filter(
+                (post) => post.id !== deletedPostId
+            );
+
+            // Write updated post list back to the cache
+            client.writeQuery({
+                query: GET_POSTS,
+                variables: { page: 1 },
+                data: {
+                    getAllPosts: remainingPosts,
+                },
+            });
+
+            // Update total post count in the cache
+            if (postCountData)
+            {
+                client.writeQuery({
+                    query: TOTAL_POST_COUNT,
+                    data: {
+                        postCount: postCountData.postCount - 1, // Decrement the post count
                     },
                 });
             }
@@ -79,7 +147,6 @@ function Home()
         }
     };
 
-    // Generate an array of page numbers
     // Generate an array of page numbers with ellipses
     const renderPaginationNumbers = () =>
     {
@@ -89,12 +156,10 @@ function Home()
 
         if (totalPages <= maxPageNumbersToShow)
         {
-            // If total pages are less than or equal to the maximum numbers to show
             startPage = 1;
             endPage = totalPages;
         } else
         {
-            // Calculate start and end page numbers based on the current page
             if (page <= Math.ceil(maxPageNumbersToShow / 2))
             {
                 startPage = 1;
@@ -110,21 +175,15 @@ function Home()
             }
         }
 
-        // Add previous ellipsis if there are pages before the startPage
         if (startPage > 1)
         {
             pageNumbers.push(
-                <button
-                    key="prev-ellipsis"
-                    className="btn btn-outline-primary mx-1"
-                    disabled
-                >
+                <button key="prev-ellipsis" className="btn btn-outline-primary mx-1" disabled>
                     ...
                 </button>
             );
         }
 
-        // Add page number buttons
         for (let i = startPage; i <= endPage; i++)
         {
             pageNumbers.push(
@@ -138,15 +197,10 @@ function Home()
             );
         }
 
-        // Add next ellipsis if there are pages after the endPage
         if (endPage < totalPages)
         {
             pageNumbers.push(
-                <button
-                    key="next-ellipsis"
-                    className="btn btn-outline-primary mx-1"
-                    disabled
-                >
+                <button key="next-ellipsis" className="btn btn-outline-primary mx-1" disabled>
                     ...
                 </button>
             );
@@ -156,7 +210,7 @@ function Home()
     };
 
     return (
-        <div className='container p-5'>
+        <div className="container p-5">
             <div className="row">
                 {data.getAllPosts.map((post) => (
                     <div className="col-md-4" key={post.id}>
@@ -172,9 +226,7 @@ function Home()
                                 <h5 className="card-title">{post.content.slice(0, 50)}...</h5>
                                 <p className="card-text">Posted by {post.postedBy.username}</p>
                                 <p className="card-text">
-                                    <small className="text-muted">
-                                        {moment(post.createdAt).fromNow()}
-                                    </small>
+                                    <small className="text-muted">{moment(post.createdAt).fromNow()}</small>
                                 </p>
                             </div>
                         </div>
@@ -183,7 +235,6 @@ function Home()
             </div>
 
             {/* Pagination Controls */}
-
             <div className="d-flex justify-content-center mt-4">
                 <span className="mx-3">Page {page} of {totalPages}</span>
                 <button
@@ -193,7 +244,6 @@ function Home()
                 >
                     Previous
                 </button>
-                {/* Render Pagination Numbers */}
                 {renderPaginationNumbers()}
                 <button
                     className="btn btn-outline-primary"
@@ -205,8 +255,6 @@ function Home()
             </div>
 
             {/* Debugging (Optional) */}
-            <hr />
-            {JSON.stringify(addedPost)}
             <hr />
             {JSON.stringify(state.user)}
         </div>

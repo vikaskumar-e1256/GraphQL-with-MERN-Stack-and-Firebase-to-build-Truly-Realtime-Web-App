@@ -47,5 +47,7 @@ type Mutation {
 
 type Subscription {
   postAdded: Post
+  postUpdated: Post
+  postDeleted: Post
 
 }
