@@ -170,6 +170,25 @@ const singlePost = async (parent, args, { req }) =>
 
 const postCount = async () => await Post.countDocuments().exec();
 
+const search = async (parent, args, { req }) =>
+{
+    try
+    {
+        // Perform text search on the 'content' field
+        const posts = await Post.find({
+            $text: { $search: args.query }
+         })
+            .populate('postedBy', '_id username') // Populate the 'postedBy' field with user details
+            .sort({ createdAt: -1 })             // Order by createdAt desc
+            .exec();                             // Execute the query
+
+        return posts;
+    } catch (error)
+    {
+        console.error(`Error searching posts: ${error.message}`);
+        throw new Error(`Failed to search posts: ${error.message}`);
+    }
+};
 
 
 module.exports = {
@@ -178,7 +197,8 @@ module.exports = {
         getAllPosts,
         getPostsByUser,
         singlePost,
-        postCount
+        postCount,
+        search
     },
     Mutation: {
         // Post creation mutation

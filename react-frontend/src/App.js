@@ -17,6 +17,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import PublicRoute from './components/PublicRoute';
 import Users from './pages/Users';
 import SingleUser from './pages/SingleUser';
+import SearchResult from './pages/SearchResult';
 import SinglePost from './pages/posts/SinglePost';
 
 const httpLink = createHttpLink({
@@ -57,6 +58,7 @@ function App()
         <Route path='/post/:postId' element={<SinglePost />} />
         <Route path='/users' element={<Users />} />
         <Route path='/complete-registration' element={<CompleteRegistration />} />
+        <Route path='/search' element={<SearchResult />} />
 
         {/* Public Routes */}
         <Route

@@ -9,15 +9,44 @@ const cloudinary = require('cloudinary').v2
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
 const { authCheck, authCheckMiddleware } = require('./helpers/auth');
+const Post = require('./models/post');
 
-// Database Connection
-const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
-main().catch(err => console.log(err));
+
+const clientOptions = {
+    serverApi: { version: '1', strict: false, deprecationErrors: true }
+};
 
 async function main()
 {
-    await mongoose.connect(process.env.DATABASE_LOCAL, clientOptions);
+    try
+    {
+        if (!process.env.DATABASE_LOCAL)
+        {
+            throw new Error("Database connection string is not defined in environment variables.");
+        }
+
+        // Connect to the database
+        await mongoose.connect(process.env.DATABASE_LOCAL, clientOptions);
+        console.log("Connected to the database.");
+
+        /// Synchronize indexes after the connection is established
+        try
+        {
+            await Post.syncIndexes();
+            console.log("Indexes synchronized successfully.");
+        } catch (error)
+        {
+            console.error("Error synchronizing indexes:", error);
+        }
+
+    } catch (error)
+    {
+        console.error("Database connection error:", error);
+    }
 }
+
+// Call the main function to initiate connection and index sync
+main().catch(err => console.error("Error in main execution:", err));
 
 // Create an instance of ApolloServer
 const server = new ApolloServer({

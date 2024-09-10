@@ -28,6 +28,15 @@ export const GET_POSTS = gql`
   ${POST_COMMON_FIELDS_FRAGMENT}
 `;
 
+export const GET_SEARCH_POSTS = gql`
+  query Query($query: String!) {
+    search(query: $query) {
+        ...postInfo
+    }
+  }
+  ${POST_COMMON_FIELDS_FRAGMENT}
+`;
+
 export const GET_USERS = gql`
   query Query {
     allUsers {

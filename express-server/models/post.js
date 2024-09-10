@@ -5,7 +5,7 @@ const postSchema = new mongoose.Schema({
 
     content: {
         type: String,
-        required: 'Content is required'
+        required: 'Content is required',
     },
     image: {
         url: {
@@ -23,5 +23,8 @@ const postSchema = new mongoose.Schema({
     }
 
 }, { timestamps: true });
+
+// Create text index on the 'content' field
+postSchema.index({ content: "text" });
 
 module.exports = mongoose.model('Post', postSchema);

@@ -1,18 +1,17 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import { AuthContext } from "../context/authContext";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
-
-
 
 const Nav = () =>
 {
     const { state, dispatch } = useContext(AuthContext);
     const { user } = state;
-    console.log(user);
     let history = useNavigate();
     const auth = getAuth();
+
+    const [searchTerm, setSearchTerm] = useState("");
 
     const logout = () =>
     {
@@ -27,7 +26,14 @@ const Nav = () =>
         {
             toast.error(error.message);
         });
-    }
+    };
+
+    const handleSearch = (e) =>
+    {
+        e.preventDefault();
+        history(`/search?s=${searchTerm}`);
+    };
+
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-body-tertiary">
             <div className="container-fluid">
@@ -60,12 +66,12 @@ const Nav = () =>
 
                         {!user && (
                             <>
-                            <li className="nav-item">
-                                <NavLink className="nav-link" to="/login">Login</NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink className="nav-link" to="/register">Register</NavLink>
-                            </li>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/login">Login</NavLink>
+                                </li>
+                                <li className="nav-item">
+                                    <NavLink className="nav-link" to="/register">Register</NavLink>
+                                </li>
                             </>
                         )}
 
@@ -74,37 +80,20 @@ const Nav = () =>
                                 <a style={{ 'cursor': 'pointer' }} className="nav-link" onClick={() => logout()}>Logout</a>
                             </li>
                         )}
-
-                        {/* <li className="nav-item dropdown">
-                            <a
-                                data-mdb-dropdown-init
-                                className="nav-link dropdown-toggle"
-                                href="#"
-                                id="navbarDropdown"
-                                role="button"
-                                aria-expanded="false"
-                            >
-                                Dropdown
-                            </a>
-                            <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li>
-                                    <a className="dropdown-item" href="#">Action</a>
-                                </li>
-                                <li>
-                                    <a className="dropdown-item" href="#">Another action</a>
-                                </li>
-                                <li><hr className="dropdown-divider" /></li>
-                                <li>
-                                    <a className="dropdown-item" href="#">Something else here</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link disabled"
-                            >Disabled</a
-                            >
-                        </li> */}
                     </ul>
+
+                    {/* Search Box and Button */}
+                    <form className="d-flex" onSubmit={handleSearch}>
+                        <input
+                            className="form-control me-2"
+                            type="search"
+                            placeholder="Search"
+                            aria-label="Search"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <button className="btn btn-outline-success" type="submit">Search</button>
+                    </form>
                 </div>
             </div>
         </nav>
