@@ -42,3 +42,10 @@ type Mutation {
   postUpdate(input: PostUpdateInput!): Post!
   postDelete(postId: String!): Post!
 }
+
+# Subscription Definitions
+
+type Subscription {
+  postAdded: Post
+
+}

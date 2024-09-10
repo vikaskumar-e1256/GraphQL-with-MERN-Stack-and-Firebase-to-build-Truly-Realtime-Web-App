@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const User = require('../../models/user');
 const Post = require('../../models/post');
 const { authCheck } = require('../../helpers/auth');
+const { PubSub } = require('graphql-subscriptions');
+
 
 // Query: fetch all posts
 const getAllPosts = async (parent, args, { req }) =>
@@ -86,6 +88,8 @@ const postCreate = async (parent, args, { req }) =>
         // Populate the 'postedBy' field with user's id and username
         await newPost.populate('postedBy', '_id username');
 
+        // Publish the postCreated event
+        pubsub.publish('POST_CREATED', { postAdded: newPost });
         return newPost;
 
     } catch (error)
@@ -190,6 +194,7 @@ const search = async (parent, args, { req }) =>
     }
 };
 
+const pubsub = new PubSub();
 
 module.exports = {
     Query: {
@@ -205,5 +210,10 @@ module.exports = {
         postCreate,
         postUpdate,
         postDelete
+    },
+    Subscription: {
+        postAdded: {
+            subscribe: () => pubsub.asyncIterator('POST_CREATED'),
+        }
     }
 }

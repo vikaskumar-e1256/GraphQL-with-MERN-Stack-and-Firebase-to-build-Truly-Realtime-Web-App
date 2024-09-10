@@ -30,7 +30,7 @@ const { useServer } = require('graphql-ws/lib/use/ws');
         // WebSocket server for subscriptions
         const wsServer = new WebSocketServer({
             server: httpServer,
-            path: '/subscriptions',
+            path: '/graphql',
         });
 
         // Schema setup
@@ -125,7 +125,7 @@ const { useServer } = require('graphql-ws/lib/use/ws');
         await mongoose.connect(process.env.DATABASE_LOCAL, {
             serverApi: { version: '1', strict: false, deprecationErrors: true },
         });
-        console.log("Connected to the database.");
+        console.log("💥 Connected to the database.");
 
         // Synchronize indexes
         try
