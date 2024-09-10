@@ -42,7 +42,6 @@ const { useServer } = require('graphql-ws/lib/use/ws');
         // ApolloServer initialization
         const server = new ApolloServer({
             schema,
-            context: async ({ req, res }) => ({ req, res }),
             plugins: [
                 ApolloServerPluginDrainHttpServer({ httpServer }),
                 {
@@ -65,7 +64,14 @@ const { useServer } = require('graphql-ws/lib/use/ws');
         // Middleware
         app.use(cors());
         app.use(bodyParser.json({ limit: '5mb' }));
-        app.use('/graphql', expressMiddleware(server));
+
+        // Apply Apollo middleware to Express and pass req, res context
+        app.use('/graphql', expressMiddleware(server, {
+            context: async ({ req, res }) =>
+            {
+                return { req, res };  // This ensures req, res are passed correctly
+            },
+        }));
 
         // REST Endpoint for testing
         app.get('/rest', authCheck, (req, res) =>
