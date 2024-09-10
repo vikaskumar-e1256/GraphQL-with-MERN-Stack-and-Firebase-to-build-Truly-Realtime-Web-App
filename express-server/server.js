@@ -5,31 +5,129 @@ const { expressMiddleware } = require('@apollo/server/express4');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const cloudinary = require('cloudinary').v2
+const cloudinary = require('cloudinary').v2;
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
 const { authCheck, authCheckMiddleware } = require('./helpers/auth');
 const Post = require('./models/post');
 
+const { createServer } = require('http');
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { WebSocketServer } = require('ws');
+const { useServer } = require('graphql-ws/lib/use/ws');
 
-const clientOptions = {
-    serverApi: { version: '1', strict: false, deprecationErrors: true }
-};
-
-async function main()
+(async function startApolloServer()
 {
     try
     {
+        // Initialize Express app
+        const app = express();
+
+        // Create an HTTP server
+        const httpServer = createServer(app);
+
+        // WebSocket server for subscriptions
+        const wsServer = new WebSocketServer({
+            server: httpServer,
+            path: '/subscriptions',
+        });
+
+        // Schema setup
+        const schema = makeExecutableSchema({ typeDefs, resolvers });
+
+        // WebSocket cleanup setup
+        const serverCleanup = useServer({ schema }, wsServer);
+
+        // ApolloServer initialization
+        const server = new ApolloServer({
+            schema,
+            context: async ({ req, res }) => ({ req, res }),
+            plugins: [
+                ApolloServerPluginDrainHttpServer({ httpServer }),
+                {
+                    async serverWillStart()
+                    {
+                        return {
+                            async drainServer()
+                            {
+                                await serverCleanup.dispose();
+                            },
+                        };
+                    },
+                },
+            ],
+        });
+
+        // Start Apollo Server
+        await server.start();
+
+        // Middleware
+        app.use(cors());
+        app.use(bodyParser.json({ limit: '5mb' }));
+        app.use('/graphql', expressMiddleware(server));
+
+        // REST Endpoint for testing
+        app.get('/rest', authCheck, (req, res) =>
+        {
+            res.json({ data: 'Hello from Express server!' });
+        });
+
+        // Cloudinary configuration
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_SECRET_KEY,
+        });
+
+        // Upload image route
+        app.post('/uploadimage', authCheckMiddleware, async (req, res) =>
+        {
+            try
+            {
+                const { image } = req.body;
+                const result = await cloudinary.uploader.upload(image, {
+                    use_filename: true,
+                    unique_filename: false,
+                    overwrite: true,
+                });
+                res.json(result);
+            } catch (error)
+            {
+                console.error("Image upload error:", error);
+                res.status(500).json({ error: "Image upload failed" });
+            }
+        });
+
+        // Remove image route
+        app.post('/removeimage', authCheckMiddleware, async (req, res) =>
+        {
+            try
+            {
+                const { public_id } = req.body;
+                const result = await cloudinary.uploader.destroy(public_id, {
+                    colors: true,
+                });
+                res.json(result);
+            } catch (error)
+            {
+                console.error("Image removal error:", error);
+                res.status(500).json({ error: "Image removal failed" });
+            }
+        });
+
+        // Database Connection
         if (!process.env.DATABASE_LOCAL)
         {
             throw new Error("Database connection string is not defined in environment variables.");
         }
 
-        // Connect to the database
-        await mongoose.connect(process.env.DATABASE_LOCAL, clientOptions);
+        await mongoose.connect(process.env.DATABASE_LOCAL, {
+            serverApi: { version: '1', strict: false, deprecationErrors: true },
+        });
         console.log("Connected to the database.");
 
-        /// Synchronize indexes after the connection is established
+        // Synchronize indexes
         try
         {
             await Post.syncIndexes();
@@ -39,109 +137,16 @@ async function main()
             console.error("Error synchronizing indexes:", error);
         }
 
+        // Start server
+        const port = process.env.PORT || 8000;
+        httpServer.listen(port, () =>
+        {
+            console.log(`🚀 Server running at http://localhost:${port}`);
+            console.log(`🚀 GraphQL endpoint available at http://localhost:${port}/graphql`);
+        });
     } catch (error)
     {
-        console.error("Database connection error:", error);
+        console.error("Server startup error:", error);
+        process.exit(1); // Gracefully exit in case of startup failure
     }
-}
-
-// Call the main function to initiate connection and index sync
-main().catch(err => console.error("Error in main execution:", err));
-
-// Create an instance of ApolloServer
-const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: async ({ req, res }) =>
-    {
-        // Ensure req and res are passed correctly
-        return { req, res };
-    }
-});
-
-// Start the Apollo Server and integrate with Express
-async function startApolloServer()
-{
-    // Initialize Express app
-    const app = express();
-
-    // Apply middlewares like CORS and body-parser
-    app.use(cors());
-    app.use(bodyParser.json({limit: "5mb"}));
-
-    // Start Apollo Server
-    await server.start();
-
-    // Apply Apollo GraphQL middleware and set the path to /graphql
-    app.use('/graphql', expressMiddleware(server, {
-        context: async ({ req, res }) =>
-        {
-            return { req, res };
-        }
-    }));
-
-    // Define other Express routes if needed
-    app.get('/rest', authCheck, (req, res) =>
-    {
-        res.json({ data: 'Hello from Express server!' });
-    });
-
-    // cloudinary Configuration
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_SECRET_KEY
-    });
-
-    // Upload the image
-    app.post('/uploadimage', authCheckMiddleware, async(req, res) =>
-    {
-        const options = {
-            use_filename: true,
-            unique_filename: false,
-            overwrite: true,
-        };
-
-        try
-        {
-            const imagePath = req.body.image;
-            const result = await cloudinary.uploader.upload(imagePath, options);
-            console.log(result);
-            res.send(result);
-        } catch (error)
-        {
-            console.error(error);
-        }
-    });
-
-    // Remove the image
-    app.post('/removeimage', authCheckMiddleware, async(req, res) =>
-    {
-        // Return colors in the response
-        const options = {
-            colors: true,
-        };
-
-        try
-        {
-            // Get details about the asset
-            const publicId = req.body.public_id;
-            const result = await cloudinary.uploader.destroy(publicId, options);
-            console.log(result);
-            res.send(result);
-        } catch (error)
-        {
-            console.error(error);
-        }
-    });
-
-    // Start the Express server on port 8000
-    const port = process.env.PORT || 8000;
-    app.listen(port, () =>
-    {
-        console.log(`🚀 Express server running at http://localhost:${port}`);
-        console.log(`🚀 GraphQL endpoint available at http://localhost:${port}/graphql`);
-    });
-}
-
-startApolloServer();
+})();
