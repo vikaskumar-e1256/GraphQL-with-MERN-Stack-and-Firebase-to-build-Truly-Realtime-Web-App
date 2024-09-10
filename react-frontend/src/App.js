@@ -1,5 +1,9 @@
 import { useContext } from 'react';
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
+import { split, HttpLink } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import { setContext } from '@apollo/client/link/context';
@@ -20,9 +24,18 @@ import SingleUser from './pages/SingleUser';
 import SearchResult from './pages/SearchResult';
 import SinglePost from './pages/posts/SinglePost';
 
-const httpLink = createHttpLink({
+
+const httpLink = new HttpLink({
   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
 });
+
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: process.env.REACT_APP_GRAPHQL_SUBSCRIPTION_ENDPOINT,
+  }),
+);
+
+
 
 function App()
 {
@@ -41,8 +54,23 @@ function App()
     };
   });
 
+  // The split function takes three parameters:
+  //
+  // * A function that's called for each operation to execute
+  // * The Link to use for an operation if the function returns a "truthy" value
+  // * The Link to use for an operation if the function returns a "falsy" value
+  const splitLink = split(
+    ({ query }) =>
+    {
+      const definition = getMainDefinition(query);
+      return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
+    },
+    wsLink,
+    httpLink,
+  );
+
   const client = new ApolloClient({
-    link: authLink.concat(httpLink),
+    link: authLink.concat(splitLink),
     cache: new InMemoryCache(),
   });
 
