@@ -1,10 +1,11 @@
-import { useQuery } from '@apollo/client';
+import { useQuery, useSubscription } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { useContext, useState } from 'react';
 import { AuthContext } from '../context/authContext';
 import { GET_POSTS, TOTAL_POST_COUNT } from '../graphql/queries';
 import moment from 'moment'; // For formatting date
 import { Link } from 'react-router-dom';
+import { POST_ADDED } from '../graphql/subscriptions';
 
 function Home()
 {
@@ -21,6 +22,39 @@ function Home()
 
     // Fetch total post count for pagination
     const { data: postCountData } = useQuery(TOTAL_POST_COUNT);
+    // Subscription to handle new posts
+    const { data: addedPost } = useSubscription(POST_ADDED, {
+        onSubscriptionData: ({ client, subscriptionData }) =>
+        {
+            const newPost = subscriptionData.data.postAdded;
+
+            // Read from cache
+            const existingPosts = client.readQuery({
+                query: GET_POSTS,
+                variables: { page: 1 }, // First page or current page
+            });
+
+            // Write new post into the cache at the beginning
+            client.writeQuery({
+                query: GET_POSTS,
+                variables: { page: 1 },
+                data: {
+                    getAllPosts: [newPost, ...existingPosts.getAllPosts], // Prepend new post
+                },
+            });
+
+            // Optionally, update total post count in the cache
+            if (postCountData)
+            {
+                client.writeQuery({
+                    query: TOTAL_POST_COUNT,
+                    data: {
+                        postCount: postCountData.postCount + 1, // Increment the post count
+                    },
+                });
+            }
+        },
+    });
 
     // Calculate the total number of pages
     const totalPosts = postCountData ? postCountData.postCount : 0;
@@ -171,6 +205,8 @@ function Home()
             </div>
 
             {/* Debugging (Optional) */}
+            <hr />
+            {JSON.stringify(addedPost)}
             <hr />
             {JSON.stringify(state.user)}
         </div>
